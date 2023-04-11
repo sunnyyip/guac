@@ -26,6 +26,7 @@ on:
       - opened
       - synchronize
       - reopened
+      - closed
 
 jobs:
   test-integration:
@@ -116,3 +117,15 @@ jobs:
       with:
         python-version: '3.10'
     - run: ./internal/testing/e2e/e2e
+
+  build_if_merged:
+    name: Build image
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - uses: mamezou-tech/buildpacks-action@master
+      with:
+        image: 'ghcr.io/kusaridev/local-organic-guac'
+        builder: 'paketobuildpacks/builder:base'
+        buildpacks: 'paketo-buildpacks/go'
+        publish: true
