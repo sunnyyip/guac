@@ -123,21 +123,23 @@ jobs:
     # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ secrets.GHCR_USERNAME }}
-        password: ${{ secrets.GHCR_PASSWORD }}
-    - name: setup pack 
-      uses: buildpacks/github-actions/setup-pack@v5.0.0
-    - run: |
-        #!/usr/bin/env bash
-        set -euo pipefail
-        pack build ${IMAGE} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish
-      shell: bash
-      env:
-        IMAGE: ghcr.io/sunnyyip/local-organic-guac
-        # image: 'ghcr.io/kusaridev/local-organic-guac'
-        BUILDER: paketobuildpacks/builder:base
-        BUILDPACK: paketo-buildpacks/go
+      - name: Checkout code
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # tag=v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_PASSWORD }}
+      - name: setup pack 
+        uses: buildpacks/github-actions/setup-pack@v5.0.0
+      - run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          pack build ${IMAGE} --builder ${BUILDER} --buildpack ${BUILDPACK} --publish
+        shell: bash
+        env:
+          # IMAGE: 'ghcr.io/kusaridev/local-organic-guac'
+          IMAGE: ghcr.io/sunnyyip/local-organic-guac
+          BUILDER: paketobuildpacks/builder:base
+          BUILDPACK: paketo-buildpacks/go
