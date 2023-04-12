@@ -123,9 +123,16 @@ jobs:
     # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.GHCR_USERNAME }}
+        password: ${{ secrets.GHCR_PASSWORD }}
     - uses: mamezou-tech/buildpacks-action@master
       with:
-        image: 'ghcr.io/kusaridev/local-organic-guac'
+        # image: 'ghcr.io/kusaridev/local-organic-guac'
+        image: 'ghcr.io/sunnyyip/local-organic-guac'
         builder: 'paketobuildpacks/builder:base'
         buildpacks: 'paketo-buildpacks/go'
         publish: true
