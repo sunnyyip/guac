@@ -21,7 +21,7 @@ on:
 
 permissions:
   packages: write # To publish container images to GHCR
-  id-token: write # needed for signing the images with GitHub OIDC Token **not production ready**
+  id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
   build-image-on-release:
