@@ -26,6 +26,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 
 	"github.com/guacsec/guac/pkg/assembler/backends/inmem"
@@ -36,8 +37,9 @@ import (
 )
 
 const (
-	neo4js = "neo4j"
-	inmems = "inmem"
+	neo4js             = "neo4j"
+	inmems             = "inmem"
+	default_access_log = "/var/tmp/guac/logs/access.log"
 )
 
 func startServer(cmd *cobra.Command) {
@@ -50,14 +52,50 @@ func startServer(cmd *cobra.Command) {
 		os.Exit(1)
 	}
 
+	// err := os.MkdirAll(filepath.Dir(default_access_log), 0750)
+	// if err != nil {
+	// 	fmt.Printf("Unable to create logs dir: %v\n", err)
+	// }
+	// f, err := os.Create(default_access_log)
+	// if err != nil {
+	// 	fmt.Printf("Unable to create logs file - %s: %v\n", default_access_log, err)
+	// }
+	// gin.DefaultWriter = io.MultiWriter(f)
+
+	r := gin.New()
+	r.Use(gin.Recovery())
+	gin.DisableConsoleColor()
+	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+
+		// custom access log format
+		return fmt.Sprintf("%s - - [%s] \"%s %s %s\" %d %d \"%s\" \"%s\" %d %s\n",
+			param.ClientIP,
+			param.TimeStamp.Format(time.RFC3339Nano),
+			param.Method,
+			param.Path,
+			param.Request.Proto,
+			param.StatusCode,
+			param.BodySize,
+			param.Request.Referer(),
+			param.Request.UserAgent(),
+			param.Latency.Milliseconds(),
+			param.ErrorMessage,
+		)
+	}))
+
+	r.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "I'm healthy!")
+	})
+
 	srv, err := getGraphqlServer()
 	if err != nil {
 		logger.Errorf("unable to initialize graphql server: %v", err)
 		os.Exit(1)
 	}
-	http.Handle("/query", srv)
+	r.POST("/query", srv)
+
 	if flags.debug {
-		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+		r.GET("/", playgroundHandler())
 		logger.Infof("connect to http://localhost:%d/ for GraphQL playground", flags.port)
 	}
 
@@ -66,7 +104,10 @@ func startServer(cmd *cobra.Command) {
 		go ingestData(flags.port)
 	}
 
-	server := &http.Server{Addr: fmt.Sprintf(":%d", flags.port)}
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", flags.port),
+		Handler: r,
+	}
 	logger.Info("starting server")
 	go func() {
 		logger.Infof("server finished: %s", server.ListenAndServe())
@@ -99,7 +140,7 @@ func validateFlags() error {
 	return nil
 }
 
-func getGraphqlServer() (*handler.Server, error) {
+func getGraphqlServer() (gin.HandlerFunc, error) {
 	var topResolver resolvers.Resolver
 
 	switch flags.backend {
@@ -133,5 +174,15 @@ func getGraphqlServer() (*handler.Server, error) {
 	config := generated.Config{Resolvers: &topResolver}
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
-	return srv, nil
+	return func(c *gin.Context) {
+		srv.ServeHTTP(c.Writer, c.Request)
+	}, nil
+}
+
+func playgroundHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL playground", "/query")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
 }
