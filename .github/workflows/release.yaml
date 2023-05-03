@@ -131,7 +131,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@main
       - name: Install slsa-verifier
-        uses: slsa-framework/slsa-verifier-installer/actions/installer@v2.2.0 
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.2.0 
       - name: Verify image and provenance
         run: |
           #!/usr/bin/env bash
