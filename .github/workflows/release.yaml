@@ -15,12 +15,16 @@
 name: release-guac-image
 
 on:
+
+on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
 permissions:
-  actions: read # for detecting the Github Actions environment.
+  actions: read   # for detecting the Github Actions environment.
   packages: write # To publish container images to GHCR
   id-token: write # needed for signing the images with GitHub OIDC Token
 
@@ -55,12 +59,17 @@ jobs:
           COMMIT=$(git rev-parse HEAD)
           BUILD=$(date +%FT%T%z)
           PKG=github.com/guacsec/guac/pkg/version
+
           IMAGE_URI_TAG=${IMAGE_URI}:${{ github.ref_name }}
+
+          [[ $GITHUB_REF =~ '^refs/tags/v.*' ]] \
+            && PUBLISH="--publish" \
+            || PUBLISH=""
+            
           pack build ${IMAGE_URI_TAG} \
             --builder ${BUILDER} \
             --buildpack ${BUILDPACK} \
-            --publish \
-            --sbom-output-dir ${BUILDPACK_SBOM_OUTPUT_DIR} \
+            ${PUBLISH} \
             --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
             --env BP_GO_TARGETS=${BP_GO_TARGETS}
           echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
@@ -69,8 +78,6 @@ jobs:
           BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
           BUILDER: paketobuildpacks/builder:base
           BUILDPACK: paketo-buildpacks/go
-          BUILDPACK_SBOM_OUTPUT_DIR: sbom-output-dir
-          BUILDPACK_SPDX_SBOM: "launch/paketo-buildpacks_go-build/targets/sbom.spdx.json"
 
   sign:
     name: Sign image and generate sbom
