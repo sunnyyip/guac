@@ -15,8 +15,6 @@
 name: release-guac-image
 
 on:
-
-on:
   push:
     branches:
       - main
