@@ -73,6 +73,7 @@ jobs:
   sign:
     needs: [build]
     if: startsWith(github.ref, 'refs/tags/')
+    steps:
       - name: Install cosign
         uses: sigstore/cosign-installer@main
       - name: Install crane
