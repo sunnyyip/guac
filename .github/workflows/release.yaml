@@ -65,7 +65,8 @@ jobs:
             --buildpack ${BUILDPACK} \
             --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
             --env BP_GO_TARGETS=${BP_GO_TARGETS}
-          EOF)
+          EOF
+          )
           
           # push image to registry on tag build only 
           if [[ ${GITHUB_REF} =~ refs/tags/v.* ]]
