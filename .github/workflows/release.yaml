@@ -61,13 +61,15 @@ jobs:
             --buildpack ${BUILDPACK} \
             --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
             --env BP_GO_TARGETS=${BP_GO_TARGETS}
-            --publish
           echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
         shell: bash
         env:
           BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
           BUILDER: paketobuildpacks/builder:base
           BUILDPACK: paketo-buildpacks/go
+      - name: Push image
+        if: startsWith(github.ref, 'refs/tags/')
+        run: docker push ${IMAGE_URI}:${{ github.ref_name }}
 
   sign:
     name: Sign image and generate sbom
