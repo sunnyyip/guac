@@ -16,8 +16,6 @@ name: release-guac-image
 
 on:
   push:
-    branches:
-      - main
     tags:
       - 'v*'
 
@@ -57,25 +55,14 @@ jobs:
           COMMIT=$(git rev-parse HEAD)
           BUILD=$(date +%FT%T%z)
           PKG=github.com/guacsec/guac/pkg/version
+          BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}"
           IMAGE_URI_TAG=${IMAGE_URI}:${{ github.ref_name }}
-
-          BUILDPACK_CMD=$(cat<<EOF
           pack build ${IMAGE_URI_TAG} \
             --builder ${BUILDER} \
             --buildpack ${BUILDPACK} \
-            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
+            --env BP_GO_BUILD_LDFLAGS=${BP_GO_BUILD_LDFLAGS}\
             --env BP_GO_TARGETS=${BP_GO_TARGETS}
-          EOF
-          )
-          
-          # push image to registry on tag build only 
-          if [[ ${GITHUB_REF} =~ refs/tags/v.* ]]
-          then
-            $BUILDPACK_CMD --publish
-            echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
-          else
-            $BUILDPACK_CMD
-          fi
+          echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
         shell: bash
         env:
           BP_GO_TARGETS: "./cmd/guaccollect:./cmd/guacone:./cmd/guacingest:./cmd/guacgql:./cmd/guaccsub"
