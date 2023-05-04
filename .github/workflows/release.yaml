@@ -59,8 +59,9 @@ jobs:
           pack build ${IMAGE_URI_TAG} \
             --builder ${BUILDER} \
             --buildpack ${BUILDPACK} \
-            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}"
+            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}" \
             --env BP_GO_TARGETS=${BP_GO_TARGETS}
+            --publish
           echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
         shell: bash
         env:
