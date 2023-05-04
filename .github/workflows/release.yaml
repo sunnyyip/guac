@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_URI: ghcr.io/${{ github.repository }}
-      IMAGE_URI_TAG: ${IMAGE_URI}:${{ github.ref_name }}
+      IMAGE_URI_TAG: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
     outputs:
       image: ${{ env.IMAGE_URI }}
       digest: ${{ steps.image_digest.outputs.IMAGE_DIGEST }}
