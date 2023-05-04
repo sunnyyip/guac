@@ -16,6 +16,8 @@ name: release-guac-image
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
