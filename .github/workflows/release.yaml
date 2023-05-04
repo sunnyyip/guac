@@ -55,12 +55,11 @@ jobs:
           COMMIT=$(git rev-parse HEAD)
           BUILD=$(date +%FT%T%z)
           PKG=github.com/guacsec/guac/pkg/version
-          BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}"
           IMAGE_URI_TAG=${IMAGE_URI}:${{ github.ref_name }}
           pack build ${IMAGE_URI_TAG} \
             --builder ${BUILDER} \
             --buildpack ${BUILDPACK} \
-            --env BP_GO_BUILD_LDFLAGS=${BP_GO_BUILD_LDFLAGS}\
+            --env BP_GO_BUILD_LDFLAGS="-X ${PKG}.Version=${VERSION} -X ${PKG}.Commit=${COMMIT} -X ${PKG}.Date=${BUILD}"
             --env BP_GO_TARGETS=${BP_GO_TARGETS}
           echo "IMAGE_DIGEST=$(crane digest ${IMAGE_URI_TAG})" >> $GITHUB_OUTPUT
         shell: bash
