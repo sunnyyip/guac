@@ -10,7 +10,6 @@ on:
         required: true
         type: string
       registry:
-        required: true
         type: string
         default: 'ghcr.io'
       registry-username:
@@ -18,7 +17,6 @@ on:
         type: string
         default: 'username'
       release-workflow-filename:
-        required: true
         type: string
         default: 'release.yaml'
     secrets:
