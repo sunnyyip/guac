@@ -125,7 +125,7 @@ jobs:
     needs: [build, sign, provenance]
     if: startsWith(github.ref, 'refs/tags/')
     # uses: guacsec/guac/.github/workflows/reusable-verify-image.yaml@{ref}
-    uses: .github/workflows/reusable-verify-image.yaml@${{ github.ref }}
+    uses: ./.github/workflows/reusable-verify-image.yaml
     with:
       #image: ${{ needs.build.outputs.image }}
       #digest: ${{ needs.build.outputs.digest }}
