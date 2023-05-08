@@ -23,8 +23,7 @@ on:
         default: 'release.yaml'
     secrets:
       registry-password:
-        type: string
-
+        required: false
 jobs:
   verify:
     name: Verify image and provenance
