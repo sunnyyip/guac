@@ -1,0 +1,77 @@
+name: Verify oci image
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      digest:
+        required: true
+        type: string
+      registry:
+        required: true
+        type: string
+        default: 'ghcr.io'
+      registry-username:
+        required: true
+        type: string
+        default: 'username'
+      release-workflow-filename:
+        required: true
+        type: string
+        default: 'release.yaml'
+    secrets:
+      registry-password:
+        type: string
+
+jobs:
+  verify:
+    name: Verify image and provenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test with inputs
+        run: |
+          echo "Hello ${{ inputs.registry }} and ${{ inputs.registry-username }}!"
+
+      - name: Login to container registry
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ inputs.registry-username }}
+          password: ${{ secrets.registry-password }}
+      - name: Install cosign
+        uses: sigstore/cosign-installer@204a51a57a74d190b284a0ce69b44bc37201f343 # main
+      - name: Install slsa-verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@623cf20a23f3360549eafac6efe1a158960f15f9 # v2.2.0 
+      - name: Verify image and provenance
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          echo "${IMAGE_URI_DIGEST} certificate-oidc-issuer: ${GITHUB_ACITONS_OIDC_ISSUER} certificate-identity: ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}"
+          cosign verify ${IMAGE_URI_DIGEST} \
+            --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} \
+            --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
+          slsa-verifier verify-image \
+            --source-uri github.com/${{ github.repository }} ${IMAGE_URI_DIGEST}
+        shell: bash
+        env:
+          IMAGE_URI_DIGEST: ${{ inputs.image }}@${{ inputs.digest }}
+          GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
+          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/${{ inputs.release-workflow-filename }}@${{ github.ref }}
+
+
+
+#  verify:
+#    needs: [build, sign, provenance]
+#    if: startsWith(github.ref, 'refs/tags/')
+#    # uses: guacsec/guac/.github/workflows/reusable-verify-image.yaml@{ref}
+#    uses: ./.github/workflows/reusable-verify-image.yaml
+#    with:
+#      #image: ${{ needs.build.outputs.image }}
+#      #digest: ${{ needs.build.outputs.digest }}
+#      image: ${{ github.event.needs.build.outputs.image }}
+#      digest: ${{ github.event.needs.build.outputs.digest }}
+#      registry-username: ${{ github.actor }}
+#    secrets:
+#      registry-password: ${{ secrets.GITHUB_TOKEN }}
