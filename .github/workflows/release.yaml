@@ -127,10 +127,10 @@ jobs:
     # uses: guacsec/guac/.github/workflows/reusable-verify-image.yaml@{ref}
     uses: ./.github/workflows/reusable-verify-image.yaml
     with:
-      #image: ${{ needs.build.outputs.image }}
-      #digest: ${{ needs.build.outputs.digest }}
-      image: ${{ github.event.needs.build.outputs.image }}
-      digest: ${{ github.event.needs.build.outputs.digest }}
+      image: ${{ needs.build.outputs.image }}
+      digest: ${{ needs.build.outputs.digest }}
+      # image: ${{ github.event.needs.build.outputs.image }}
+      # digest: ${{ github.event.needs.build.outputs.digest }}
       registry-username: ${{ github.actor }}
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}

@@ -27,10 +27,6 @@ jobs:
     name: Verify image and provenance
     runs-on: ubuntu-latest
     steps:
-      - name: Test with inputs
-        run: |
-          echo "Hello ${{ inputs.registry }} and ${{ inputs.registry-username }}!"
-
       - name: Login to container registry
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
         with:
@@ -45,7 +41,6 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          echo "${IMAGE_URI_DIGEST} certificate-oidc-issuer: ${GITHUB_ACITONS_OIDC_ISSUER} certificate-identity: ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}"
           cosign verify ${IMAGE_URI_DIGEST} \
             --certificate-oidc-issuer ${GITHUB_ACITONS_OIDC_ISSUER} \
             --certificate-identity ${COSIGN_KEYLESS_SIGNING_CERT_SUBJECT}
