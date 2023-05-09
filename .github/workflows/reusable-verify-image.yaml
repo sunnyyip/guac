@@ -16,7 +16,7 @@ on:
         required: true
         type: string
         default: 'username'
-      release-workflow-filename:
+      image-signing-workflow-filename:
         type: string
         default: 'release.yaml'
     secrets:
@@ -50,20 +50,4 @@ jobs:
         env:
           IMAGE_URI_DIGEST: ${{ inputs.image }}@${{ inputs.digest }}
           GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
-          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/${{ inputs.release-workflow-filename }}@${{ github.ref }}
-
-
-
-#  verify:
-#    needs: [build, sign, provenance]
-#    if: startsWith(github.ref, 'refs/tags/')
-#    # uses: guacsec/guac/.github/workflows/reusable-verify-image.yaml@{ref}
-#    uses: ./.github/workflows/reusable-verify-image.yaml
-#    with:
-#      #image: ${{ needs.build.outputs.image }}
-#      #digest: ${{ needs.build.outputs.digest }}
-#      image: ${{ github.event.needs.build.outputs.image }}
-#      digest: ${{ github.event.needs.build.outputs.digest }}
-#      registry-username: ${{ github.actor }}
-#    secrets:
-#      registry-password: ${{ secrets.GITHUB_TOKEN }}
+          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/${{ inputs.image-signing-workflow-filename }}@${{ github.ref }}
