@@ -18,7 +18,7 @@ on:
         default: 'username'
       image-signing-workflow-filename:
         type: string
-        default: 'release.yaml'
+        default: 'reusable-sign-image-sbom.yaml'
     secrets:
       registry-password:
         required: false
