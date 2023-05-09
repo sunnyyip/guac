@@ -16,8 +16,13 @@ on:
         required: true
         type: string
         default: 'username'
+      image-signing-workflow-repo:
+        type: string
+        description: 'owning repo of the reusable image signing workflow'
+        default: 'guacsec/guac'
       image-signing-workflow-filename:
         type: string
+        description: 'filename of the reusable image signing workflow'
         default: 'reusable-sign-image-sbom.yaml'
     secrets:
       registry-password:
@@ -50,4 +55,4 @@ jobs:
         env:
           IMAGE_URI_DIGEST: ${{ inputs.image }}@${{ inputs.digest }}
           GITHUB_ACITONS_OIDC_ISSUER: https://token.actions.githubusercontent.com
-          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/${{ inputs.image-signing-workflow-filename }}@${{ github.ref }}
+          COSIGN_KEYLESS_SIGNING_CERT_SUBJECT: https://github.com/${{ inputs.image-signing-workflow-repo }}/.github/workflows/${{ inputs.image-signing-workflow-filename }}@${{ github.ref }}
