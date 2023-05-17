@@ -35,6 +35,6 @@ binary: guaccollect-{{ .Os }}-{{ .Arch }}
 ldflags:
   - "-X github.com/guacsec/guac/pkg/version.Version={{ .Env.VERSION }}"
   - "-X github.com/guacsec/guac/pkg/version.Commit={{ .Env.COMMIT }}"
-#   - "-X github.com/guacsec/guac/pkg/version.CommitDate={{ .Env.COMMIT_DATE }}"
-#   - "-X github.com/guacsec/guac/pkg/version.BuildDate={{ .Env.BUILD_DATE }}"
-#   - "-X github.com/guacsec/guac/pkg/version.TreeState={{ .Env.TREE_STATE }}"
+  - "-X github.com/guacsec/guac/pkg/version.CommitDate={{ .Env.COMMIT_DATE }}"
+  - "-X github.com/guacsec/guac/pkg/version.BuildDate={{ .Env.BUILD_DATE }}"
+  - "-X github.com/guacsec/guac/pkg/version.TreeState={{ .Env.TREE_STATE }}"
