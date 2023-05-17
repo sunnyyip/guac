@@ -21,7 +21,7 @@ goos: linux
 goarch: amd64
 
 # (Optional) Entrypoint to compile.
-main: ./cmd/guaccollet/main.go
+main: ./cmd/guaccollect/main.go
 
 # (Optional) Working directory. (default: root of the project)
 dir: ./
@@ -29,7 +29,7 @@ dir: ./
 # Binary output name.
 # {{ .Os }} will be replaced by goos field in the config file.
 # {{ .Arch }} will be replaced by goarch field in the config file.
-binary: guaccollet-{{ .Os }}-{{ .Arch }}
+binary: guaccollect-{{ .Os }}-{{ .Arch }}
 
 # (Optional) ldflags generated dynamically in the workflow, and set as the `evaluated-envs` input variables in the workflow.
 ldflags:
