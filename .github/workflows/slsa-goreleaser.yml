@@ -55,7 +55,7 @@ jobs:
     needs: args
     uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.6.0
     with:
-      go-version: 1.20
+      go-version: "1.20"
       config-file: .slsa-goreleaser/${{matrix.guac_component}}-${{matrix.os}}-${{matrix.arch}}.yml
       # Optional: only needed if using ldflags.
       evaluated-envs: "VERSION:${{needs.args.outputs.version}}"
