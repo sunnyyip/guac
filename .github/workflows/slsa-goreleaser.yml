@@ -48,10 +48,10 @@ jobs:
         os:
           - linux
         #   - windows
-          - darwin
+          # - darwin
         arch:
           - amd64
-          - arm64
+          # - arm64
     needs: args
     uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.6.0
     with:

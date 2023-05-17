@@ -35,5 +35,6 @@ binary: guaccollet-{{ .Os }}-{{ .Arch }}
 ldflags:
   - "-X {{ .Env.PKG }}.Version={{ .Env.VERSION }}"
   - "-X {{ .Env.PKG }}.Commit={{ .Env.COMMIT }}"
-  - "-X {{ .Env.PKG }}.Date={{ .Env.COMMIT_DATE }}"
+  - "-X {{ .Env.PKG }}.CommitDate={{ .Env.COMMIT_DATE }}"
+  - "-X {{ .Env.PKG }}.BuildDate={{ .Env.BUILD_DATE }}"
   - "-X {{ .Env.PKG }}.TreeState={{ .Env.TREE_STATE }}"
