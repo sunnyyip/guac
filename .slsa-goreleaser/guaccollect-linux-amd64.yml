@@ -6,7 +6,7 @@ version: 1
 env:
   - GO111MODULE=on
   - CGO_ENABLED=0
-  - PKG=github.com/guacsec/guac/pkg/version
+  # - PKG=github.com/guacsec/guac/pkg/version
   # - GUAC_BIN=guaccollet
 
 # (Optional) Flags for the compiler.
@@ -33,7 +33,7 @@ binary: guaccollect-{{ .Os }}-{{ .Arch }}
 
 # (Optional) ldflags generated dynamically in the workflow, and set as the `evaluated-envs` input variables in the workflow.
 ldflags:
-  - "-X {{ .Env.PKG }}.Version={{ .Env.VERSION }}"
+  - "-X github.com/guacsec/guac/pkg/version.Version={{ .Env.VERSION }}"
 #   - "-X github.com/guacsec/guac/pkg/version.Commit={{ .Env.COMMIT }}"
 #   - "-X github.com/guacsec/guac/pkg/version.CommitDate={{ .Env.COMMIT_DATE }}"
 #   - "-X github.com/guacsec/guac/pkg/version.BuildDate={{ .Env.BUILD_DATE }}"
