@@ -24,6 +24,7 @@ main: ./cmd/{{ .Env.GUAC_BIN }}/main.go
 
 # (Optional) Working directory. (default: root of the project)
 # dir: ./relative/path/to/dir
+dir: ./
 
 # Binary output name.
 # {{ .Os }} will be replaced by goos field in the config file.
