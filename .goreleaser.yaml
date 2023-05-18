@@ -10,6 +10,15 @@ before:
   hooks:
     - go mod tidy
     - go generate ./...
+
+gomod:
+  proxy: true
+
+sboms:
+  - artifacts: binary
+    documents:
+      - "${artifact}.spdx.sbom.json"
+
 builds:
   - main: ./cmd/guaccollect
     id: guaccollect
@@ -73,39 +82,20 @@ signs:
     certificate: "${artifact}-keyless.pem"
     cmd: cosign
     args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
-    # artifacts: binary
     artifacts: all
     output: true
-  # - id: checksum-keyless
-  #   signature: "${artifact}-keyless.sig"
-  #   certificate: "${artifact}-keyless.pem"
-  #   cmd: cosign
-  #   args: ["sign-blob", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
-  #   artifacts: checksum
 
 archives:
-  # - format: tar.gz
-  #   # this name template makes the OS and Arch compatible with the results of uname.
-  #   name_template: >-
-  #     {{ .ProjectName }}_
-  #     {{- title .Os }}_
-  #     {{- if eq .Arch "amd64" }}x86_64
-  #     {{- else if eq .Arch "386" }}i386
-  #     {{- else }}{{ .Arch }}{{ end }}
-  #     {{- if .Arm }}v{{ .Arm }}{{ end }}
-  #   # use zip for windows archives
-  #   format_overrides:
-  #   - goos: windows
-  #     format: zip
   - format: binary
     name_template: "{{ .Binary }}"
     allow_different_binary_count: true
+
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
-  # name_template: 'checksums.txt'
+
 snapshot:
   name_template: SNAPSHOT-{{ .ShortCommit }}
-  # name_template: "{{ incpatch .Version }}-next"
+
 changelog:
   sort: asc
   filters:
@@ -113,14 +103,12 @@ changelog:
       - '^docs:'
       - '^test:'
 
+release:
+  prerelease: auto
+  draft: true
+  replace_existing_draft: true
+
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
-
-release:
-  # disable: false
-  # draft: true
-  replace_existing_draft: true
-  prerelease: auto
-  skip_upload: false
