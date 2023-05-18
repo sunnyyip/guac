@@ -67,6 +67,28 @@ builds:
       - darwin
       - windows
 
+signs:
+  -
+    # ID of the sign config, must be unique.
+    #
+    # Default: 'default'
+    id: foo
+    # Cosign Keyless
+  - id: guac-keyless
+    signature: "${artifact}-keyless.sig"
+    certificate: "${artifact}-keyless.pem"
+    cmd: cosign
+    args: ["sign-blob", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
+    # artifacts: binary
+    artifacts: all
+    certificate: '{{ trimsuffix .Env.artifact ".tar.gz" }}.pem'
+    output: true
+  # - id: checksum-keyless
+  #   signature: "${artifact}-keyless.sig"
+  #   certificate: "${artifact}-keyless.pem"
+  #   cmd: cosign
+  #   args: ["sign-blob", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
+  #   artifacts: checksum
 
 archives:
   - format: tar.gz
@@ -83,9 +105,11 @@ archives:
     - goos: windows
       format: zip
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "{{ .ProjectName }}_checksums.txt"
+  # name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  name_template: SNAPSHOT-{{ .ShortCommit }}
+  # name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
@@ -97,3 +121,9 @@ changelog:
 # Feel free to remove those if you don't want/use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+release:
+  draft: true
+  replace_existing_draft: true
+  prerelease: auto
+  skip_upload: false

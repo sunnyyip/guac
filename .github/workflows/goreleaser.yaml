@@ -16,9 +16,9 @@ name: goreleaser
 
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
-  #push:
-  #  tags:
-  #    - 'v*'
+  push:
+   tags:
+     - 'v*'
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
