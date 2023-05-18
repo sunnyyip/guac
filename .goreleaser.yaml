@@ -72,7 +72,7 @@ signs:
     signature: "${artifact}-keyless.sig"
     certificate: "${artifact}-keyless.pem"
     cmd: cosign
-    args: ["sign-blob", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
+    args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
     # artifacts: binary
     artifacts: all
     output: true
