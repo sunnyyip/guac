@@ -13,7 +13,7 @@ before:
 builds:
   - main: ./cmd/guaccollect
     id: guaccollect
-    binary: guaccollect
+    binary: guaccollect-{{ .Os }}-{{ .Arch }}
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
@@ -24,7 +24,7 @@ builds:
       - windows
   - main: ./cmd/guaccsub
     id: guaccsub
-    binary: guaccsub
+    binary: guaccsub-{{ .Os }}-{{ .Arch }}
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
@@ -35,7 +35,7 @@ builds:
       - windows
   - main: ./cmd/guacgql
     id: guacgql
-    binary: guacgql
+    binary: guacgql-{{ .Os }}-{{ .Arch }}
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
@@ -46,7 +46,7 @@ builds:
       - windows
   - main: ./cmd/guacingest
     id: guacingest
-    binary: guacingest
+    binary: guacingest-{{ .Os }}-{{ .Arch }}
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
@@ -57,7 +57,7 @@ builds:
       - windows
   - main: ./cmd/guacone
     id: guacone
-    binary: guacone
+    binary: guacone-{{ .Os }}-{{ .Arch }}
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
@@ -68,13 +68,7 @@ builds:
       - windows
 
 signs:
-  -
-    # ID of the sign config, must be unique.
-    #
-    # Default: 'default'
-    id: foo
-    # Cosign Keyless
-  - id: guac-keyless
+  - id: guac-cosign-keyless
     signature: "${artifact}-keyless.sig"
     certificate: "${artifact}-keyless.pem"
     cmd: cosign
@@ -90,19 +84,22 @@ signs:
   #   artifacts: checksum
 
 archives:
-  - format: tar.gz
-    # this name template makes the OS and Arch compatible with the results of uname.
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
-    format_overrides:
-    - goos: windows
-      format: zip
+  # - format: tar.gz
+  #   # this name template makes the OS and Arch compatible with the results of uname.
+  #   name_template: >-
+  #     {{ .ProjectName }}_
+  #     {{- title .Os }}_
+  #     {{- if eq .Arch "amd64" }}x86_64
+  #     {{- else if eq .Arch "386" }}i386
+  #     {{- else }}{{ .Arch }}{{ end }}
+  #     {{- if .Arm }}v{{ .Arm }}{{ end }}
+  #   # use zip for windows archives
+  #   format_overrides:
+  #   - goos: windows
+  #     format: zip
+  - format: binary
+    name_template: "{{ .Binary }}"
+    allow_different_binary_count: true
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
   # name_template: 'checksums.txt'
