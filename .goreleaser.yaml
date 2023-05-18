@@ -11,8 +11,8 @@ before:
     - go mod tidy
     - go generate ./...
 
-gomod:
-  proxy: true
+# gomod:
+#   proxy: true
 
 sboms:
   - artifacts: binary
