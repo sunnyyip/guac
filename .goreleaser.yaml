@@ -122,7 +122,7 @@ changelog:
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 
 release:
-  disable: false
+  # disable: false
   draft: true
   replace_existing_draft: true
   prerelease: auto
