@@ -22,7 +22,7 @@ on:
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
-  packages: write # To publish container images to GHCR
+  contents: write # To upload assets to release.
   id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
