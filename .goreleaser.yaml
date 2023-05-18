@@ -81,7 +81,6 @@ signs:
     args: ["sign-blob", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
     # artifacts: binary
     artifacts: all
-    certificate: '{{ trimsuffix .Env.artifact ".tar.gz" }}.pem'
     output: true
   # - id: checksum-keyless
   #   signature: "${artifact}-keyless.sig"
