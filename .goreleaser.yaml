@@ -1,6 +1,4 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
-
+---
 project_name: guac
 
 env:
@@ -11,8 +9,13 @@ before:
     - go mod tidy
     - go generate ./...
 
-# gomod:
-#   proxy: true
+gomod:
+  # Proxy a module from proxy.golang.org, making the builds verifiable.
+  proxy: true
+  env:
+    - GOPROXY=https://proxy.golang.org,direct
+    - GOSUMDB=sum.golang.org
+  mod: mod
 
 sboms:
   - artifacts: binary
@@ -24,14 +27,12 @@ builds:
     id: guaccollect
     binary: guaccollect-{{ .Os }}-{{ .Arch }}
     ldflags:
+      # See https://goreleaser.com/customization/templates/#common-fields for field definitions
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
     # goos: [ 'darwin', 'linux', 'windows' ] - default
     # goarch:  [ '386', 'amd64', 'arm64' ] - default
-    ignore:
-      - goos: darwin
-        goarch: 386
   - main: ./cmd/guaccsub
     id: guaccsub
     binary: guaccsub-{{ .Os }}-{{ .Arch }}
@@ -39,9 +40,6 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    ignore:
-      - goos: darwin
-        goarch: 386
   - main: ./cmd/guacgql
     id: guacgql
     binary: guacgql-{{ .Os }}-{{ .Arch }}
@@ -49,9 +47,6 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    ignore:
-      - goos: darwin
-        goarch: 386
   - main: ./cmd/guacingest
     id: guacingest
     binary: guacingest-{{ .Os }}-{{ .Arch }}
@@ -59,9 +54,6 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    ignore:
-      - goos: darwin
-        goarch: 386
   - main: ./cmd/guacone
     id: guacone
     binary: guacone-{{ .Os }}-{{ .Arch }}
@@ -69,9 +61,6 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    ignore:
-      - goos: darwin
-        goarch: 386
 
 signs:
   - id: guac-cosign-keyless
@@ -102,8 +91,8 @@ changelog:
 
 release:
   prerelease: auto
-  # draft: false
-  # replace_existing_draft: true
+  draft: false
+  replace_existing_draft: true
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
