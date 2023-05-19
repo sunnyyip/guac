@@ -4,23 +4,11 @@ project_name: guac
 env:
   - CGO_ENABLED=0
   - PKG=github.com/guacsec/guac/pkg/version
+
 before:
   hooks:
     - go mod tidy
     - go generate ./...
-
-gomod:
-  # Proxy a module from proxy.golang.org, making the builds verifiable.
-  proxy: true
-  env:
-    - GOPROXY=https://proxy.golang.org,direct
-    - GOSUMDB=sum.golang.org
-  mod: mod
-
-sboms:
-  - artifacts: binary
-    documents:
-      - "${artifact}.spdx.sbom.json"
 
 builds:
   - main: ./cmd/guaccollect
@@ -61,6 +49,11 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
+
+sboms:
+  - artifacts: binary
+    documents:
+      - "${artifact}.spdx.sbom.json"
 
 signs:
   - id: guac-cosign-keyless
