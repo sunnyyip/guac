@@ -105,8 +105,8 @@ changelog:
 
 release:
   prerelease: auto
-  draft: true
-  replace_existing_draft: true
+  # draft: false
+  # replace_existing_draft: true
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
