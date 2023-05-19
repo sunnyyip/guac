@@ -27,10 +27,11 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    goos:
-      - linux
-      - darwin
-      - windows
+    # goos: [ 'darwin', 'linux', 'windows' ] - default
+    # goarch:  [ '386', 'amd64', 'arm64' ] - default
+    ignore:
+      - goos: darwin
+        goarch: 386
   - main: ./cmd/guaccsub
     id: guaccsub
     binary: guaccsub-{{ .Os }}-{{ .Arch }}
@@ -38,10 +39,9 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    goos:
-      - linux
-      - darwin
-      - windows
+    ignore:
+      - goos: darwin
+        goarch: 386
   - main: ./cmd/guacgql
     id: guacgql
     binary: guacgql-{{ .Os }}-{{ .Arch }}
@@ -49,10 +49,9 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    goos:
-      - linux
-      - darwin
-      - windows
+    ignore:
+      - goos: darwin
+        goarch: 386
   - main: ./cmd/guacingest
     id: guacingest
     binary: guacingest-{{ .Os }}-{{ .Arch }}
@@ -60,10 +59,9 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    goos:
-      - linux
-      - darwin
-      - windows
+    ignore:
+      - goos: darwin
+        goarch: 386
   - main: ./cmd/guacone
     id: guacone
     binary: guacone-{{ .Os }}-{{ .Arch }}
@@ -71,10 +69,9 @@ builds:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
       - -X {{.Env.PKG}}.Version={{.Summary}}
-    goos:
-      - linux
-      - darwin
-      - windows
+    ignore:
+      - goos: darwin
+        goarch: 386
 
 signs:
   - id: guac-cosign-keyless
