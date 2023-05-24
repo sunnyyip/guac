@@ -58,6 +58,7 @@ builds:
     id: guaccsub
     # binary: guaccsub-{{ .Os }}-{{ .Arch }}
     binary: guaccsub
+
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
@@ -82,6 +83,7 @@ builds:
     id: guacone
     # binary: guacone-{{ .Os }}-{{ .Arch }}
     binary: guacone
+
     ldflags:
       - -X {{.Env.PKG}}.Commit={{.FullCommit}}
       - -X {{.Env.PKG}}.Date={{.Date}}
@@ -101,6 +103,7 @@ sboms:
 #     args: ["sign-blob", "--yes", "--output-signature", "${artifact}-keyless.sig", "--output-certificate", "${artifact}-keyless.pem", "${artifact}"]
 #     artifacts: all
 #     output: true
+
 
 archives:
   - format: binary

@@ -24,6 +24,7 @@ permissions:
   actions: read   # for detecting the Github Actions environment.
   contents: write # To upload assets to release.
   packages: write # To publish container images to GHCR
+
   id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
@@ -45,6 +46,7 @@ jobs:
       - name: Run GoReleaser
         id: run-goreleaser
         uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b # v4.2.0
+
         with:
           distribution: goreleaser
           version: latest
