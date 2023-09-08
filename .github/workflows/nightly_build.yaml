@@ -60,6 +60,9 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
 
+          git config --global user.email "runner@github.com"
+          git config --global user.name "Nightly Build Workflow"
+
           git tag -a v0.0.0-nightly -m "push nightly build tag at $(date -Iseconds))"
           git push --tags
 
