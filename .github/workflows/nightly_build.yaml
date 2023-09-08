@@ -1,0 +1,61 @@
+#
+# Copyright 2022 The GUAC Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: nightly-build
+
+on:
+  workflow_dispatch: # testing only, trigger manually to test it works
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  actions: read   # for detecting the Github Actions environment.
+
+jobs:
+  compose-tarball:
+    runs-on: ubuntu-latest
+    name: nightly build 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v3
+
+      - name: Advance nightly tag
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}          
+          script: |
+            github.git.deleteRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "tags/nightly"
+            })
+
+#      - name: Create and publish compose tarball
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          #!/usr/bin/env bash
+#          set -euo pipefail
+#
+#          mkdir guac-compose
+#          cp .env guac-compose/
+#          cp docker-compose.yml guac-compose/
+#          cp -r container_files guac-compose/
+#          sed -i s/local-organic-guac/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-compose/.env
+#          tar -zcvf guac-compose-${{ github.ref_name }}.tar.gz guac-compose/
+#          rm -rf guac-compose/
+#          gh release upload ${{ github.ref_name }} guac-compose-${{ github.ref_name }}.tar.gz
+#          rm guac-compose-${{ github.ref_name }}.tar.gz
+#        shell: bash
+#
