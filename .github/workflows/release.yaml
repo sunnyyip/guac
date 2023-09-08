@@ -21,6 +21,8 @@ on:
       - main
     tags:
       - 'v*'
+  schedule:
+    - cron: '*/10 * * * 1-5'
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
@@ -72,7 +74,9 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean
+          # use .goreleaser-nightly.yaml for nightly build; otherwise use the default
+          args: ${{ github.ref == 'refs/tags/v0.0.0-nightly' && 'release --clean -f .goreleaser-nightly.yaml' || 'release --clean' }} 
+          # args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_CONTEXT: default
