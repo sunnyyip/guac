@@ -37,13 +37,13 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}          
           script: |
 
-            // try { } catch (error) { }
-
-            github.git.deleteRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "tags/v0.0.0-nightly"
-            })
+            try { 
+              github.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: "tags/v0.0.0-nightly"
+              })
+            } catch (error) { }
 
             github.git.createRef({
               owner: context.repo.owner,
