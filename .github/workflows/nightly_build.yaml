@@ -24,6 +24,9 @@ permissions:
   actions: read   # for detecting the Github Actions environment.
   contents: write # To upload assets to release.
 
+env:
+  NIGHTLY_RELEASE_TAG_REF: refs/tags/v0.0.0-nightly
+
 jobs:
   compose-tarball:
     runs-on: ubuntu-latest
@@ -32,41 +35,50 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v3
 
-      - name: Advance nightly tag
-        uses: actions/github-script@v3
-        with:
-          # github-token: ${{secrets.GITHUB_TOKEN}}          
-          github-token: ${{ secrets.PAT_TAG_PUSHER }}
-          script: |
+      - name: Create and publish compose tarball
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+ 
+          gh release delete ${{ env.NIGHTLY_RELEASE_TAG_REF }} --cleanup-tag --yes
 
-            try { 
-              github.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: "tags/v0.0.0-nightly"
-              })
-            } catch (error) { }
+      #- name: Advance nightly tag
+      #  uses: actions/github-script@v3
+      #  with:
+      #    # github-token: ${{secrets.GITHUB_TOKEN}}          
+      #    github-token: ${{ secrets.PAT_TAG_PUSHER }}
+      #    script: |
 
-            github.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/v0.0.0-nightly",
-              sha: context.sha
-            })
+      #      try { 
+      #        github.git.deleteRef({
+      #          owner: context.repo.owner,
+      #          repo: context.repo.repo,
+      #          ref: "tags/v0.0.0-nightly"
+      #        })
+      #      } catch (error) { }
 
-      # - name: Push nightly tag
-        # if: success() || failure()
-        # env:
-          # GITHUB_TOKEN: ${{ secrets.PAT_TAG_PUSHER }}
-        # run: |
-          # #!/usr/bin/env bash
-          # set -euo pipefail
-# 
-          # git config --global user.email "runner@github.com"
-          # git config --global user.name "Nightly Build Workflow"
-# 
-          # git tag -a v0.0.0-nightly -m "scheduled nightly build at $(date -Iseconds)"
-          # git push --tags
+      #      github.git.createRef({
+      #        owner: context.repo.owner,
+      #        repo: context.repo.repo,
+      #        ref: "refs/tags/v0.0.0-nightly",
+      #        sha: context.sha
+      #      })
+
+      - name: Push nightly tag
+        if: success() || failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TAG_PUSHER }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          git config --global user.email "runner@github.com"
+          git config --global user.name "Nightly Build Workflow"
+
+          git tag -a v0.0.0-nightly -m "scheduled nightly build at $(date -Iseconds)"
+          git push --tags
 
 #      - name: Create and publish compose tarball
 #        env:
