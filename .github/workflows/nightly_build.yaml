@@ -46,13 +46,22 @@ jobs:
               })
             } catch (error) { }
 
-            github.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/v0.0.0-nightly",
-              sha: context.sha
-            })
+            # github.git.createRef({
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   ref: "refs/tags/v0.0.0-nightly",
+            #   sha: context.sha
+            # })
 
+      - name: Push nightly tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          git tag -a v0.0.0-nightly -m "push nightly build tag at $(date -Iseconds))"
+          git push --tags
 
 #      - name: Create and publish compose tarball
 #        env:
