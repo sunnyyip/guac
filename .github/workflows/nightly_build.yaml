@@ -46,12 +46,12 @@ jobs:
               })
             } catch (error) { }
 
-            # github.git.createRef({
-            #   owner: context.repo.owner,
-            #   repo: context.repo.repo,
-            #   ref: "refs/tags/v0.0.0-nightly",
-            #   sha: context.sha
-            # })
+            // # github.git.createRef({
+            // #   owner: context.repo.owner,
+            // #   repo: context.repo.repo,
+            // #   ref: "refs/tags/v0.0.0-nightly",
+            // #   sha: context.sha
+            // # })
 
       - name: Push nightly tag
         env:
