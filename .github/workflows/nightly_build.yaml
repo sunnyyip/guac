@@ -21,6 +21,7 @@ on:
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
+  contents: write # To upload assets to release.
 
 jobs:
   compose-tarball:
