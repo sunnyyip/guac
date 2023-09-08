@@ -36,11 +36,15 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}          
           script: |
-            github.git.deleteRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "tags/v0.0.0-nightly"
-            })
+            try {
+              github.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: "tags/v0.0.0-nightly"
+              })
+            } catch (err) {
+              alert('Ignore error - assuming tag doesn't exist!'); 
+            }
 
             github.git.createRef({
             owner: context.repo.owner,
