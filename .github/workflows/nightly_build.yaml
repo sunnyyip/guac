@@ -64,7 +64,7 @@ jobs:
           git config --global user.email "runner@github.com"
           git config --global user.name "Nightly Build Workflow"
 
-          git tag -a v0.0.0-nightly -m "push nightly build tag at $(date -Iseconds))"
+          git tag -a v0.0.0-nightly -m "scheduled nightly build at $(date -Iseconds)"
           git push --tags
 
 #      - name: Create and publish compose tarball
