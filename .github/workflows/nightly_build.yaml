@@ -54,6 +54,7 @@ jobs:
             // # })
 
       - name: Push nightly tag
+        if: success() || failure()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
