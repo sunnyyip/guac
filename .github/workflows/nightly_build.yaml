@@ -35,7 +35,8 @@ jobs:
       - name: Advance nightly tag
         uses: actions/github-script@v3
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}          
+          # github-token: ${{secrets.GITHUB_TOKEN}}          
+          github-token: ${{ secrets.PAT_TAG_PUSHER }}
           script: |
 
             try { 
@@ -46,26 +47,26 @@ jobs:
               })
             } catch (error) { }
 
-            // # github.git.createRef({
-            // #   owner: context.repo.owner,
-            // #   repo: context.repo.repo,
-            // #   ref: "refs/tags/v0.0.0-nightly",
-            // #   sha: context.sha
-            // # })
+            github.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "refs/tags/v0.0.0-nightly",
+              sha: context.sha
+            })
 
-      - name: Push nightly tag
-        if: success() || failure()
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TAG_PUSHER }}
-        run: |
-          #!/usr/bin/env bash
-          set -euo pipefail
-
-          git config --global user.email "runner@github.com"
-          git config --global user.name "Nightly Build Workflow"
-
-          git tag -a v0.0.0-nightly -m "scheduled nightly build at $(date -Iseconds)"
-          git push --tags
+      # - name: Push nightly tag
+        # if: success() || failure()
+        # env:
+          # GITHUB_TOKEN: ${{ secrets.PAT_TAG_PUSHER }}
+        # run: |
+          # #!/usr/bin/env bash
+          # set -euo pipefail
+# 
+          # git config --global user.email "runner@github.com"
+          # git config --global user.name "Nightly Build Workflow"
+# 
+          # git tag -a v0.0.0-nightly -m "scheduled nightly build at $(date -Iseconds)"
+          # git push --tags
 
 #      - name: Create and publish compose tarball
 #        env:
