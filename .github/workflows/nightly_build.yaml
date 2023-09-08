@@ -48,7 +48,7 @@ jobs:
             github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: "ref/tags/v0.0.0-nightly",
+              ref: "refs/tags/v0.0.0-nightly",
               sha: context.sha
             })
 
