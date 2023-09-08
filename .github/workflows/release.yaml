@@ -160,7 +160,7 @@ jobs:
     name: generate compose tarball
     needs: [goreleaser]
     # Unable to use env.NIGHTLY_RELEASE_TAG_REF here
-    if:  startsWith(github.ref, 'refs/tags/') && github.ref != 'ref/tags/v0.0.0-nightly'
+    if:  startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/tags/v0.0.0-nightly'
     steps:
       - name: Checkout code
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v3
