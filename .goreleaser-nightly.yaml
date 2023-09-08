@@ -214,6 +214,7 @@ changelog:
 # Without Goreleaser Pro, we have to replicate config for different builds
 release:
   prerelease: true
+  mode: replace
   draft: true
   replace_existing_draft: true
   make_latest: false
