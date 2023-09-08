@@ -56,7 +56,7 @@ jobs:
       - name: Push nightly tag
         if: success() || failure()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TAG_PUSHER }}
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
