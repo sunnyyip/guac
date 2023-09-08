@@ -42,8 +42,8 @@ jobs:
                 repo: context.repo.repo,
                 ref: "tags/v0.0.0-nightly"
               })
-            } catch (err) {
-              alert('Ignore error - assuming tag doesn't exist!'); 
+            } catch (error) {
+              // console.error(error);
             }
 
             github.git.createRef({
