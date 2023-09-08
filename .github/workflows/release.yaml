@@ -21,8 +21,6 @@ on:
       - main
     tags:
       - 'v*'
-  schedule:
-    - cron: '*/10 * * * 1-5'
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
