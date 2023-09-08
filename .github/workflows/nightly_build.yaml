@@ -39,8 +39,16 @@ jobs:
             github.git.deleteRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: "tags/nightly"
+              ref: "tags/v0.0.0-nightly"
             })
+
+            github.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: "tags/v0.0.0-nightly",
+            sha: context.sha
+            })
+
 
 #      - name: Create and publish compose tarball
 #        env:
