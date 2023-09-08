@@ -36,21 +36,20 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}          
           script: |
-            try {
-              github.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: "tags/v0.0.0-nightly"
-              })
-            } catch (error) {
-              // console.error(error);
-            }
+
+            // try { } catch (error) { }
+
+            github.git.deleteRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "tags/v0.0.0-nightly"
+            })
 
             github.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: "ref/tags/v0.0.0-nightly",
-            sha: context.sha
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: "ref/tags/v0.0.0-nightly",
+              sha: context.sha
             })
 
 
