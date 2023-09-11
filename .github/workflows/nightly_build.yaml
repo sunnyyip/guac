@@ -62,16 +62,17 @@ jobs:
               })
             } catch (error) { }
             
-            const { owner, repo } = context.repo
-            // const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ env.NIGHTLY_RELEASE_TAG }} })
-
             github.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: "refs/tags/v0.0.0-nightly",
               sha: context.sha
             })
+
+            const { owner, repo } = context.repo
+            // const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
+            await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}"" })
+
 
       # - name: Push nightly tag
       #   if: success() || failure()
