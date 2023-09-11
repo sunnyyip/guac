@@ -71,7 +71,7 @@ jobs:
 
             // const { owner, repo } = context.repo
             // const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
-            // await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}"" })
+            // await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}" })
 
 
       # - name: Push nightly tag
