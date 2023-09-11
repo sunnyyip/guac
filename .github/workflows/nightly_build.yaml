@@ -54,6 +54,11 @@ jobs:
           github-token: ${{ secrets.PAT_TAG_PUSHER }}
           script: |
 
+            const { owner, repo } = context.repo
+            // const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
+            const result = await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}" })
+            console.log(result)
+
             try { 
               github.git.deleteRef({
                 owner: context.repo.owner,
@@ -68,10 +73,6 @@ jobs:
               ref: "refs/tags/v0.0.0-nightly",
               sha: context.sha
             })
-
-            // const { owner, repo } = context.repo
-            // const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
-            // await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}" })
 
 
       # - name: Push nightly tag
