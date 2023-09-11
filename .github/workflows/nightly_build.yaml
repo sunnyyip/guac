@@ -43,9 +43,9 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
  
-          git push --delete origin ${{ env.NIGHTLY_RELEASE_TAG }}
           gh release list
-          gh release delete ${{ env.NIGHTLY_RELEASE_TAG }} --yes
+          gh release delete ${{ env.NIGHTLY_RELEASE_TAG }} --yes || true
+          git push --delete origin ${{ env.NIGHTLY_RELEASE_TAG }} || true
 
       #- name: Advance nightly tag
       #  uses: actions/github-script@v3
