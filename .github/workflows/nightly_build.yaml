@@ -59,7 +59,10 @@ jobs:
             try { 
               console.log('Deleting release')
               // const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
-              const result = await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}" })
+
+              const { data: { id } } = await github.repos.getReleaseByTag({ owner, repo, tag: ${{ env.NIGHTLY_RELEASE_TAG }} })
+              const result = await github.repos.deleteRelease({ owner, repo, release_id: id })
+              // const result = await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}" })
               console.log(result)
             } catch (error) { }
 
