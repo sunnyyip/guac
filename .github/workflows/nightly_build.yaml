@@ -25,7 +25,7 @@ permissions:
   contents: write # To upload assets to release.
 
 env:
-  NIGHTLY_RELEASE_TAG_REF: refs/tags/v0.0.0-nightly
+  NIGHTLY_RELEASE_TAG: v0.0.0-nightly
 
 jobs:
   compose-tarball:
@@ -38,14 +38,14 @@ jobs:
       - name: Create and publish compose tarball
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NIGHTLY_RELEASE_TAG_REF: "refs/tags/${{ env.NIGHTLY_RELEASE_TAG }}"
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
  
+          git push --delete origin ${{ env.NIGHTLY_RELEASE_TAG }}
           gh release list
-          gh release delete ${{ env.NIGHTLY_RELEASE_TAG_REF }} --yes
-          git push --delete origin ${{ env.NIGHTLY_RELEASE_TAG_REF }}
-          sleep 5
+          gh release delete ${{ env.NIGHTLY_RELEASE_TAG }} --yes
 
       #- name: Advance nightly tag
       #  uses: actions/github-script@v3
