@@ -45,6 +45,7 @@ jobs:
           gh release list
           gh release delete ${{ env.NIGHTLY_RELEASE_TAG_REF }} --yes
           git push --delete origin ${{ env.NIGHTLY_RELEASE_TAG_REF }}
+          sleep 5
 
       #- name: Advance nightly tag
       #  uses: actions/github-script@v3
