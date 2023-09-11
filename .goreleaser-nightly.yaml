@@ -212,12 +212,12 @@ changelog:
 # Anything above this line should be identical to .goreleaser.yaml 
 # The following are specifically for nightly build
 # Without Goreleaser Pro, we have to replicate config for different builds
-name_template: nightly
 release:
   prerelease: auto
   mode: replace
   # draft: false
   make_latest: false
+  name_template: nightly
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
