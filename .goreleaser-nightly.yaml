@@ -215,8 +215,7 @@ changelog:
 release:
   prerelease: true
   mode: replace
-  draft: true
-  replace_existing_draft: true
+  draft: false
   make_latest: false
 
 # The lines beneath this are called `modelines`. See `:help modeline`
