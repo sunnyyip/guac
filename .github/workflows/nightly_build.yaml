@@ -17,7 +17,7 @@ name: nightly-build
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
   schedule:
-    - cron: '*/8 * * * 1-5'
+    - cron: '*/15 * * * 1-5'
     # - cron: '0 0 * * *'
 
 permissions:
