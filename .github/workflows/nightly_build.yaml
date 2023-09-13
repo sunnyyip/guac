@@ -12,14 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: nightly-release
+name: Nightly Release
 
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
   schedule:
     - cron: '0 * * * 1-5'
-    # - cron: '3 3 * * *'
-    # - cron: '3 3 * * *'
+    - cron: '22 2 * * *'
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
@@ -38,7 +37,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v3
 
+      - name: Check for changes
+        id: check-for-changes
+        run: |
+          TAG_SHA=$(git rev-parse ${{ env.NIGHTLY_RELEASE_TAG }})
+          echo "TAG: $TAG_SHA"
+          echo "main: ${{ github.sha }}"
+
+          if [ "$TAG_SHA" != "${{ github.sha }}" ]
+          then
+            echo "main_has_changed=" >> $GITHUB_OUTPUT
+            echo "main branch has changed, trigger new release"
+          else
+            echo "no change detected, skip the release"
+          fi
+
       - name: refresh nightly tag
+        if: contains(${{ steps.check-for-changes.outputs }}, 'main_has_changed' )
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.PAT_TAG_PUSHER }}   # must use PAT here or the release workflow won't be triggered
@@ -59,21 +74,14 @@ jobs:
                 owner: owner,
                 repo: repo,
                 ref: "tags/${{ env.NIGHTLY_RELEASE_TAG }}"
-                owner: owner,
-                repo: repo,
-                ref: "tags/${{ env.NIGHTLY_RELEASE_TAG }}"
               })
             } catch (error) { }
 
-            // sleep to make sure the delete ops above are propagated in github
             // sleep to make sure the delete ops above are propagated in github
             await new Promise(r => setTimeout(r, 3000));
             
             console.log('Creating tag to trigger build')
             github.git.createRef({
-              owner: owner,
-              repo: repo,
-              ref: "refs/tags/${{ env.NIGHTLY_RELEASE_TAG }}",
               owner: owner,
               repo: repo,
               ref: "refs/tags/${{ env.NIGHTLY_RELEASE_TAG }}",
