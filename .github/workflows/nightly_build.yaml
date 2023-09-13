@@ -47,7 +47,7 @@ jobs:
 
             try { 
               console.log('Deleting release')
-              const { data: { id } } = await github.repos.getReleaseByTag({ 
+              const { data: { id } } = await github.rest.repos.getReleaseByTag({ 
                 owner, 
                 repo, 
                 tag: "${{ env.NIGHTLY_RELEASE_TAG }}"
