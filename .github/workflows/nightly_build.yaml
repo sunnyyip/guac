@@ -37,20 +37,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v3
 
-      - name: Check for changes
-        id: check-for-changes
-        run: |
-          TAG_SHA=$(git rev-parse "${{ env.NIGHTLY_RELEASE_TAG }}")
-          if [ "$TAG_SHA" != "${{ github.sha }}" ]
-          then
-            echo "main_has_changed=" >> $GITHUB_OUTPUT
-            echo "main branch has changed, trigger new release"
-          else
-            echo "no change detected, skip release"
-          fi
-
       - name: refresh nightly tag
-        if: contains(${{ steps.check-for-changes.outputs }}, 'main_has_changed' )
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.PAT_TAG_PUSHER }}   # must use PAT here or the release workflow won't be triggered
