@@ -50,7 +50,7 @@ jobs:
               const { data: { id } } = await github.repos.getReleaseByTag({ owner, repo, tag: "${{ env.NIGHTLY_RELEASE_TAG }}" })
               const result = await github.repos.deleteRelease({ owner, repo, release_id: id })
               console.log(result)
-            } catch (error) { // ignoring error }
+            } catch (error) { }
 
         # // try { 
         # //   console.log('Deleting tag')
