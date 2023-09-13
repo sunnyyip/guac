@@ -58,12 +58,8 @@ jobs:
 
             try { 
               console.log('Deleting release')
-              // const { data: { id } } = await github.repos.getLatestRelease({ owner, repo })
-
-              // const { data: { id } } = await github.repos.getReleaseByTag({ owner, repo, tag: "${{ env.NIGHTLY_RELEASE_TAG }}"" })
               const { data: { id } } = await github.repos.getReleaseByTag({ owner, repo, tag: "${{ env.NIGHTLY_RELEASE_TAG }}" })
               const result = await github.repos.deleteRelease({ owner, repo, release_id: id })
-              // const result = await github.repos.deleteRelease({ owner, repo, release_id: "${{ env.NIGHTLY_RELEASE_TAG }}" })
               console.log(result)
             } catch (error) { }
 
@@ -75,6 +71,8 @@ jobs:
                 ref: "tags/v0.0.0-nightly"
               })
             } catch (error) { }
+
+            await new Promise(r => setTimeout(r, 3000));
             
             console.log('Creating tag to trigger build')
             github.git.createRef({

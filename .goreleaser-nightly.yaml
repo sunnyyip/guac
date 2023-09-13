@@ -11,7 +11,6 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      # - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly-amd64"
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
     dockerfile: dockerfiles/Dockerfile.goreleaser
     build_flag_templates:
@@ -26,7 +25,6 @@ dockers:
     goos: linux
     goarch: arm64
     image_templates:
-      # - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly-arm64"
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
     dockerfile: dockerfiles/Dockerfile.goreleaser
     build_flag_templates:
@@ -39,13 +37,10 @@ dockers:
       - "--builder={{ .Env.DOCKER_CONTEXT }}"
 
 docker_manifests:
-  # - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}"
   - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly"
     image_templates:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-arm64"
-      # - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly-amd64"
-      # - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly-arm64"
 
 docker_signs:
   - cmd: cosign
@@ -215,14 +210,13 @@ changelog:
       - "^test:"
 
 # Anything above this line should be identical to .goreleaser.yaml 
+# EXCEPT - dockers.docker_manifests.name_template
 # The following are specifically for nightly build
-# Without Goreleaser Pro, we have to replicate config for different builds
+# Without Goreleaser Pro, we have to replicat this config file for different builds
 release:
   prerelease: true
   mode: replace
   make_latest: false
-  # name_template: nightly
-  # tag: nightly
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
