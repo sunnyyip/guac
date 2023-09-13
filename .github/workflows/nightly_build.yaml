@@ -40,16 +40,13 @@ jobs:
       - name: Check for changes
         id: check-for-changes
         run: |
-          TAG_SHA=$(git rev-parse ${{ env.NIGHTLY_RELEASE_TAG }})
-          echo "TAG: $TAG_SHA"
-          echo "main: ${{ github.sha }}"
-
+          TAG_SHA=$(git rev-parse "${{ env.NIGHTLY_RELEASE_TAG }}")
           if [ "$TAG_SHA" != "${{ github.sha }}" ]
           then
             echo "main_has_changed=" >> $GITHUB_OUTPUT
             echo "main branch has changed, trigger new release"
           else
-            echo "no change detected, skip the release"
+            echo "no change detected, skip release"
           fi
 
       - name: refresh nightly tag
