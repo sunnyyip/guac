@@ -76,7 +76,7 @@ jobs:
             await new Promise(r => setTimeout(r, 3000));
         
             console.log('Creating tag to trigger build')
-            result = github.rest.git.createRef({
+            const result = github.rest.git.createRef({
               owner: owner,
               repo: repo,
               ref: "refs/tags/${{ env.NIGHTLY_RELEASE_TAG }}",
