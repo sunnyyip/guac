@@ -52,7 +52,11 @@ jobs:
                 repo, 
                 tag: "${{ env.NIGHTLY_RELEASE_TAG }}"
               })
-              const result = await github.rest.repos.deleteRelease({ owner, repo, release_id: id })
+              const result = await github.rest.repos.deleteRelease({ 
+                owner, 
+                repo, 
+                release_id: id 
+              })
               console.log(result)
             } catch (error) { 
               // ignore error in case release doesn't exist
