@@ -12,46 +12,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: nightly-build
+name: nightly-release
 
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
   schedule:
     - cron: '0 * * * 1-5'
-    # - cron: '0 0 * * *'
+    # - cron: '3 3 * * *'
 
 permissions:
   actions: read   # for detecting the Github Actions environment.
   contents: write # To upload assets to release.
 
 env:
-  NIGHTLY_RELEASE_TAG: v0.0.0-nightly
+  NIGHTLY_RELEASE_TAG: v0.0.0-nightly   #goreleaser enforces semver on tags
+  # Note that the container tag (per .goreleaser-nightly.yaml) 
+  # is simply 'nightly' without semver prefix
 
 jobs:
-  compose-tarball:
+  refresh-nightly-tag:
     runs-on: ubuntu-latest
-    name: nightly build 
+    name: trigger nightly build 
     steps:
       - name: Checkout code
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v3
 
-      # - name: Create and publish compose tarball
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     NIGHTLY_RELEASE_TAG_REF: "refs/tags/${{ env.NIGHTLY_RELEASE_TAG }}"
-      #   run: |
-      #     #!/usr/bin/env bash
-      #     set -euo pipefail
- 
-      #     gh release list
-      #     gh release delete ${{ env.NIGHTLY_RELEASE_TAG }} --yes || true
-      #     git push --delete origin ${{ env.NIGHTLY_RELEASE_TAG }} || true
-
-      - name: Advance nightly tag
+      - name: refresh nightly tag
         uses: actions/github-script@v3
         with:
-          # github-token: ${{secrets.GITHUB_TOKEN}}          
-          github-token: ${{ secrets.PAT_TAG_PUSHER }}
+          github-token: ${{ secrets.PAT_TAG_PUSHER }}   # must use PAT here or the release workflow won't be triggered
           script: |
 
             const { owner, repo } = context.repo
@@ -66,52 +55,19 @@ jobs:
             try { 
               console.log('Deleting tag')
               github.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: "tags/v0.0.0-nightly"
+                owner: owner,
+                repo: repo,
+                ref: "tags/${{ env.NIGHTLY_RELEASE_TAG }}"
               })
             } catch (error) { }
 
+            // sleep to make sure the delete ops above are propagated in github
             await new Promise(r => setTimeout(r, 3000));
             
             console.log('Creating tag to trigger build')
             github.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: "refs/tags/v0.0.0-nightly",
+              owner: owner,
+              repo: repo,
+              ref: "refs/tags/${{ env.NIGHTLY_RELEASE_TAG }}",
               sha: context.sha
             })
-
-
-      # - name: Push nightly tag
-      #   if: success() || failure()
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.PAT_TAG_PUSHER }}
-      #   run: |
-      #     #!/usr/bin/env bash
-      #     set -euo pipefail
-
-      #     git config --global user.email "runner@github.com"
-      #     git config --global user.name "Nightly Build Workflow"
-
-      #     git tag -a v0.0.0-nightly -m "scheduled nightly build at $(date -Iseconds)"
-      #     git push --tags
-
-#      - name: Create and publish compose tarball
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          #!/usr/bin/env bash
-#          set -euo pipefail
-#
-#          mkdir guac-compose
-#          cp .env guac-compose/
-#          cp docker-compose.yml guac-compose/
-#          cp -r container_files guac-compose/
-#          sed -i s/local-organic-guac/ghcr.io\\/${{ github.repository_owner }}\\/guac:${{ github.ref_name }}/ guac-compose/.env
-#          tar -zcvf guac-compose-${{ github.ref_name }}.tar.gz guac-compose/
-#          rm -rf guac-compose/
-#          gh release upload ${{ github.ref_name }} guac-compose-${{ github.ref_name }}.tar.gz
-#          rm guac-compose-${{ github.ref_name }}.tar.gz
-#        shell: bash
-#
