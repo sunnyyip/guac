@@ -61,7 +61,7 @@ jobs:
 
             try { 
               console.log('Deleting tag')
-              result = github.rest.git.deleteRef({
+              const result = github.rest.git.deleteRef({
                 owner: owner,
                 repo: repo,
                 ref: "tags/${{ env.NIGHTLY_RELEASE_TAG }}"
