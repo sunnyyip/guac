@@ -62,8 +62,8 @@ jobs:
         # //   console.log(result)
         # // } catch (error) { // ignoring error }
 # 
-        # // // sleep to make sure the delete ops above are propagated in github
-        # // await new Promise(r => setTimeout(r, 3000));
+            // sleep to make sure the delete ops above are propagated in github
+            await new Promise(r => setTimeout(r, 3000));
         # 
         # // console.log('Creating tag to trigger build')
         # // result = github.git.createRef({
