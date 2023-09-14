@@ -12,17 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# This workflow requires a GitHub Personal Access Token named PAT_NIGHTLY_RELEASE
+# to work. The token must have read/write permissions on Contents.
+# This is becuase the inbuilt GITHUB_TOKEN will not create a new workflow run -
+# see https://docs.github.com/en/actions/using-workflows/triggering-a-workflow
+
 name: Nightly Release
 
 on:
   workflow_dispatch: # testing only, trigger manually to test it works
   schedule:
-    - cron: '0 * * * 1-5'
     - cron: '22 2 * * *'
 
-permissions:
-  actions: read   # for detecting the Github Actions environment.
-  contents: write # To upload assets to release.
+#permissions:
+#  actions: read   # for detecting the Github Actions environment.
+#  contents: write # for managing tags and releases.
 
 env:
   NIGHTLY_RELEASE_TAG: v0.0.0-nightly   #goreleaser enforces semver on tags
@@ -40,7 +45,7 @@ jobs:
       - name: refresh nightly tag
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.PAT_TAG_PUSHER }}   # must use PAT here or the release workflow won't be triggered
+          github-token: ${{ secrets.PAT_NIGHTLY_RELEASE }}   # must use PAT here or the release workflow won't be triggered
           script: |
 
             const { owner, repo } = context.repo
