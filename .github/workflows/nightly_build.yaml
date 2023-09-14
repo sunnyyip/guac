@@ -25,8 +25,8 @@ on:
   schedule:
     - cron: '22 2 * * *'
 
-#permissions:
-#  actions: read   # for detecting the Github Actions environment.
+permissions:
+  actions: read   # for detecting the Github Actions environment.
 #  contents: write # for managing tags and releases.
 
 env:
