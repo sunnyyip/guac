@@ -1,6 +1,8 @@
+
 # GoReleaser config for Nightly Release
 # This is replicated from .goreleaser.yaml with specific release parameters
 # (at the bottom of the file) for night release.
+
 
 ---
 project_name: guac
