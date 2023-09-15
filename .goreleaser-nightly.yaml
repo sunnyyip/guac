@@ -1,3 +1,9 @@
+
+# GoReleaser config for Nightly Release
+# This is replicated from .goreleaser.yaml with specific release parameters
+# (at the bottom of the file) for night release.
+
+
 ---
 project_name: guac
 
@@ -37,7 +43,6 @@ dockers:
       - "--builder={{ .Env.DOCKER_CONTEXT }}"
 
 docker_manifests:
-  # Spe
   - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly"
     image_templates:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
@@ -213,7 +218,7 @@ changelog:
 # Anything above this line should be identical to .goreleaser.yaml 
 # EXCEPT - dockers.docker_manifests.name_template
 # The following are specifically for nightly build
-# Without Goreleaser Pro, we have to replicat this config file for different builds
+# Without Goreleaser Pro, we have to replicate this config file for different builds
 release:
   prerelease: true
   mode: replace
