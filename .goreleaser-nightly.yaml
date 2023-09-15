@@ -41,7 +41,6 @@ dockers:
       - "--builder={{ .Env.DOCKER_CONTEXT }}"
 
 docker_manifests:
-  # Spe
   - name_template: "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:nightly"
     image_templates:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY }}:{{ .Tag }}-amd64"
