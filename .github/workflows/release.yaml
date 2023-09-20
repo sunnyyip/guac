@@ -139,7 +139,6 @@ jobs:
     with:
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
       upload-assets: true
-      draft-release: ${{ contains( github.ref, 'nightly' ) && true || false }} 
 
   provenance-container:
     name: generate provenance for container
