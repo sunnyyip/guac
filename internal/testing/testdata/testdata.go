@@ -2190,10 +2190,11 @@ var (
 				VulnerabilityID: "cve-1234-5678",
 			},
 			VexData: &generated.VexStatementInputSpec{
-				KnownSince: parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
-				Origin:     "merged-vex-67124ea942ef30e1f42f3f2bf405fbbc4f5a56e6e87684fc5cd957212fa3e025",
-				Status:     generated.VexStatusAffected,
-				Statement:  "This is a test action statement",
+				KnownSince:       parseRfc3339("2023-01-19T02:36:03.290252574-06:00"),
+				Origin:           "merged-vex-67124ea942ef30e1f42f3f2bf405fbbc4f5a56e6e87684fc5cd957212fa3e025",
+				Status:           generated.VexStatusAffected,
+				VexJustification: generated.VexJustificationNotProvided,
+				Statement:        "This is a test action statement",
 			},
 		},
 	}
@@ -2227,6 +2228,29 @@ var (
 				Type:       "rpm",
 				Namespace:  strP("redhat"),
 				Name:       "openssl",
+				Version:    strP("1.1.1k-8.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "aarch64"}, {Key: "epoch", Value: "1"}},
+				Subpath:    strP(""),
+			},
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "cve", VulnerabilityID: "cve-2023-0286"},
+			VexData: &model.VexStatementInputSpec{
+				Status:           generated.VexStatusFixed,
+				VexJustification: generated.VexJustificationNotProvided,
+				Statement: `For details on how to apply this update, which includes the changes described in this advisory, refer to:
+
+https://access.redhat.com/articles/11258
+
+For the update to take effect, all services linked to the OpenSSL library must be restarted, or the system rebooted.`,
+
+				KnownSince: parseRfc3339("2023-03-23T11:14:00Z"),
+				Origin:     "RHSA-2023:1441",
+			},
+		},
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:       "rpm",
+				Namespace:  strP("redhat"),
+				Name:       "openssl",
 				Version:    strP("1.1.1k-7.el8_6"),
 				Qualifiers: []model.PackageQualifierInputSpec{{Key: "arch", Value: "x86_64"}, {Key: "epoch", Value: "1"}},
 				Subpath:    strP(""),
@@ -2247,6 +2271,23 @@ For the update to take effect, all services linked to the OpenSSL library must b
 		},
 	}
 	CsafCertifyVulnIngest = []assembler.CertifyVulnIngest{
+		{
+			Pkg: &model.PkgInputSpec{
+				Type:      "rpm",
+				Namespace: strP("redhat"),
+				Name:      "openssl",
+				Version:   strP("1.1.1k-8.el8_6"),
+				Qualifiers: []model.PackageQualifierInputSpec{
+					{Key: "arch", Value: "aarch64"},
+					{Key: "epoch", Value: "1"},
+				},
+				Subpath: strP(""),
+			},
+			Vulnerability: &model.VulnerabilityInputSpec{Type: "NoVuln", VulnerabilityID: ""},
+			VulnData: &model.ScanMetadataInput{
+				TimeScanned: parseRfc3339("2023-03-23T11:14:00Z"),
+			},
+		},
 		{
 			Pkg: &model.PkgInputSpec{
 				Type:      "rpm",

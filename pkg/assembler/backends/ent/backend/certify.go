@@ -78,7 +78,7 @@ func (b *EntBackend) IngestCertifyBads(ctx context.Context, subjects model.Packa
 		}
 		cb, err := b.IngestCertifyBad(ctx, subject, pkgMatchType, *certifyBads[i])
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestCertifyBads failed with err: %v", err)
 		}
 		result = append(result, cb)
 	}
@@ -110,7 +110,7 @@ func (b *EntBackend) IngestCertifyGoods(ctx context.Context, subjects model.Pack
 		}
 		cg, err := b.IngestCertifyGood(ctx, subject, pkgMatchType, *certifyGoods[i])
 		if err != nil {
-			return nil, gqlerror.Errorf("IngestPkgEquals failed with err: %v", err)
+			return nil, gqlerror.Errorf("IngestCertifyGoods failed with err: %v", err)
 		}
 		result = append(result, cg)
 	}
@@ -224,11 +224,11 @@ func upsertCertification[T certificationInputSpec](ctx context.Context, client *
 		}
 
 	case subject.Source != nil:
-		src, err := client.SourceName.Query().Where(sourceInputQuery(*subject.Source)).Only(ctx)
+		srcID, err := getSourceNameID(ctx, client.Client(), *subject.Source)
 		if err != nil {
 			return nil, err
 		}
-		insert.SetSource(src)
+		insert.SetSourceID(srcID)
 		conflictColumns = append(conflictColumns, certification.FieldSourceID)
 		conflictWhere = sql.And(
 			sql.IsNull(certification.FieldArtifactID),
