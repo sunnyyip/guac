@@ -30,6 +30,8 @@ type Tx struct {
 	CertifyVuln *CertifyVulnClient
 	// Dependency is the client for interacting with the Dependency builders.
 	Dependency *DependencyClient
+	// HasMetadata is the client for interacting with the HasMetadata builders.
+	HasMetadata *HasMetadataClient
 	// HasSourceAt is the client for interacting with the HasSourceAt builders.
 	HasSourceAt *HasSourceAtClient
 	// HashEqual is the client for interacting with the HashEqual builders.
@@ -50,6 +52,8 @@ type Tx struct {
 	PackageVersion *PackageVersionClient
 	// PkgEqual is the client for interacting with the PkgEqual builders.
 	PkgEqual *PkgEqualClient
+	// PointOfContact is the client for interacting with the PointOfContact builders.
+	PointOfContact *PointOfContactClient
 	// SLSAAttestation is the client for interacting with the SLSAAttestation builders.
 	SLSAAttestation *SLSAAttestationClient
 	// Scorecard is the client for interacting with the Scorecard builders.
@@ -64,6 +68,8 @@ type Tx struct {
 	VulnEqual *VulnEqualClient
 	// VulnerabilityID is the client for interacting with the VulnerabilityID builders.
 	VulnerabilityID *VulnerabilityIDClient
+	// VulnerabilityMetadata is the client for interacting with the VulnerabilityMetadata builders.
+	VulnerabilityMetadata *VulnerabilityMetadataClient
 	// VulnerabilityType is the client for interacting with the VulnerabilityType builders.
 	VulnerabilityType *VulnerabilityTypeClient
 
@@ -206,6 +212,7 @@ func (tx *Tx) init() {
 	tx.CertifyVex = NewCertifyVexClient(tx.config)
 	tx.CertifyVuln = NewCertifyVulnClient(tx.config)
 	tx.Dependency = NewDependencyClient(tx.config)
+	tx.HasMetadata = NewHasMetadataClient(tx.config)
 	tx.HasSourceAt = NewHasSourceAtClient(tx.config)
 	tx.HashEqual = NewHashEqualClient(tx.config)
 	tx.IsVulnerability = NewIsVulnerabilityClient(tx.config)
@@ -216,6 +223,7 @@ func (tx *Tx) init() {
 	tx.PackageType = NewPackageTypeClient(tx.config)
 	tx.PackageVersion = NewPackageVersionClient(tx.config)
 	tx.PkgEqual = NewPkgEqualClient(tx.config)
+	tx.PointOfContact = NewPointOfContactClient(tx.config)
 	tx.SLSAAttestation = NewSLSAAttestationClient(tx.config)
 	tx.Scorecard = NewScorecardClient(tx.config)
 	tx.SourceName = NewSourceNameClient(tx.config)
@@ -223,6 +231,7 @@ func (tx *Tx) init() {
 	tx.SourceType = NewSourceTypeClient(tx.config)
 	tx.VulnEqual = NewVulnEqualClient(tx.config)
 	tx.VulnerabilityID = NewVulnerabilityIDClient(tx.config)
+	tx.VulnerabilityMetadata = NewVulnerabilityMetadataClient(tx.config)
 	tx.VulnerabilityType = NewVulnerabilityTypeClient(tx.config)
 }
 

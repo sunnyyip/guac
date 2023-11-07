@@ -18,6 +18,7 @@ import (
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
+		schema:     cfg.Schema,
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
 		complexity: cfg.Complexity,
@@ -25,6 +26,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 }
 
 type Config struct {
+	Schema     *ast.Schema
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
 	Complexity ComplexityRoot
@@ -54,6 +56,7 @@ type ComplexityRoot struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
 	}
@@ -62,6 +65,7 @@ type ComplexityRoot struct {
 		Collector     func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Justification func(childComplexity int) int
+		KnownSince    func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Subject       func(childComplexity int) int
 	}
@@ -118,14 +122,18 @@ type ComplexityRoot struct {
 	}
 
 	HasSBOM struct {
-		Algorithm        func(childComplexity int) int
-		Collector        func(childComplexity int) int
-		Digest           func(childComplexity int) int
-		DownloadLocation func(childComplexity int) int
-		ID               func(childComplexity int) int
-		Origin           func(childComplexity int) int
-		Subject          func(childComplexity int) int
-		URI              func(childComplexity int) int
+		Algorithm            func(childComplexity int) int
+		Collector            func(childComplexity int) int
+		Digest               func(childComplexity int) int
+		DownloadLocation     func(childComplexity int) int
+		ID                   func(childComplexity int) int
+		IncludedDependencies func(childComplexity int) int
+		IncludedOccurrences  func(childComplexity int) int
+		IncludedSoftware     func(childComplexity int) int
+		KnownSince           func(childComplexity int) int
+		Origin               func(childComplexity int) int
+		Subject              func(childComplexity int) int
+		URI                  func(childComplexity int) int
 	}
 
 	HasSLSA struct {
@@ -197,8 +205,8 @@ type ComplexityRoot struct {
 		IngestDependencies              func(childComplexity int, pkgs []*model.PkgInputSpec, depPkgs []*model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependencies []*model.IsDependencyInputSpec) int
 		IngestDependency                func(childComplexity int, pkg model.PkgInputSpec, depPkg model.PkgInputSpec, depPkgMatchType model.MatchFlags, dependency model.IsDependencyInputSpec) int
 		IngestHasMetadata               func(childComplexity int, subject model.PackageSourceOrArtifactInput, pkgMatchType model.MatchFlags, hasMetadata model.HasMetadataInputSpec) int
-		IngestHasSBOMs                  func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec) int
-		IngestHasSbom                   func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec) int
+		IngestHasSBOMs                  func(childComplexity int, subjects model.PackageOrArtifactInputs, hasSBOMs []*model.HasSBOMInputSpec, includes []*model.HasSBOMIncludesInputSpec) int
+		IngestHasSbom                   func(childComplexity int, subject model.PackageOrArtifactInput, hasSbom model.HasSBOMInputSpec, includes model.HasSBOMIncludesInputSpec) int
 		IngestHasSourceAt               func(childComplexity int, pkg model.PkgInputSpec, pkgMatchType model.MatchFlags, source model.SourceInputSpec, hasSourceAt model.HasSourceAtInputSpec) int
 		IngestHasSourceAts              func(childComplexity int, pkgs []*model.PkgInputSpec, pkgMatchType model.MatchFlags, sources []*model.SourceInputSpec, hasSourceAts []*model.HasSourceAtInputSpec) int
 		IngestHashEqual                 func(childComplexity int, artifact model.ArtifactInputSpec, otherArtifact model.ArtifactInputSpec, hashEqual model.HashEqualInputSpec) int
@@ -232,6 +240,13 @@ type ComplexityRoot struct {
 		ID         func(childComplexity int) int
 		Namespaces func(childComplexity int) int
 		Type       func(childComplexity int) int
+	}
+
+	PackageIDs struct {
+		PackageNameID      func(childComplexity int) int
+		PackageNamespaceID func(childComplexity int) int
+		PackageTypeID      func(childComplexity int) int
+		PackageVersionID   func(childComplexity int) int
 	}
 
 	PackageName struct {
@@ -356,6 +371,12 @@ type ComplexityRoot struct {
 		Type       func(childComplexity int) int
 	}
 
+	SourceIDs struct {
+		SourceNameID      func(childComplexity int) int
+		SourceNamespaceID func(childComplexity int) int
+		SourceTypeID      func(childComplexity int) int
+	}
+
 	SourceName struct {
 		Commit func(childComplexity int) int
 		ID     func(childComplexity int) int
@@ -400,12 +421,16 @@ type ComplexityRoot struct {
 }
 
 type executableSchema struct {
+	schema     *ast.Schema
 	resolvers  ResolverRoot
 	directives DirectiveRoot
 	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
+	if e.schema != nil {
+		return e.schema
+	}
 	return parsedSchema
 }
 
@@ -470,6 +495,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CertifyBad.Justification(childComplexity), true
 
+	case "CertifyBad.knownSince":
+		if e.complexity.CertifyBad.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.CertifyBad.KnownSince(childComplexity), true
+
 	case "CertifyBad.origin":
 		if e.complexity.CertifyBad.Origin == nil {
 			break
@@ -504,6 +536,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CertifyGood.Justification(childComplexity), true
+
+	case "CertifyGood.knownSince":
+		if e.complexity.CertifyGood.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.CertifyGood.KnownSince(childComplexity), true
 
 	case "CertifyGood.origin":
 		if e.complexity.CertifyGood.Origin == nil {
@@ -805,6 +844,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.HasSBOM.ID(childComplexity), true
+
+	case "HasSBOM.includedDependencies":
+		if e.complexity.HasSBOM.IncludedDependencies == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.IncludedDependencies(childComplexity), true
+
+	case "HasSBOM.includedOccurrences":
+		if e.complexity.HasSBOM.IncludedOccurrences == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.IncludedOccurrences(childComplexity), true
+
+	case "HasSBOM.includedSoftware":
+		if e.complexity.HasSBOM.IncludedSoftware == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.IncludedSoftware(childComplexity), true
+
+	case "HasSBOM.knownSince":
+		if e.complexity.HasSBOM.KnownSince == nil {
+			break
+		}
+
+		return e.complexity.HasSBOM.KnownSince(childComplexity), true
 
 	case "HasSBOM.origin":
 		if e.complexity.HasSBOM.Origin == nil {
@@ -1272,7 +1339,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasSBOMs(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["hasSBOMs"].([]*model.HasSBOMInputSpec)), true
+		return e.complexity.Mutation.IngestHasSBOMs(childComplexity, args["subjects"].(model.PackageOrArtifactInputs), args["hasSBOMs"].([]*model.HasSBOMInputSpec), args["includes"].([]*model.HasSBOMIncludesInputSpec)), true
 
 	case "Mutation.ingestHasSBOM":
 		if e.complexity.Mutation.IngestHasSbom == nil {
@@ -1284,7 +1351,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["hasSBOM"].(model.HasSBOMInputSpec)), true
+		return e.complexity.Mutation.IngestHasSbom(childComplexity, args["subject"].(model.PackageOrArtifactInput), args["hasSBOM"].(model.HasSBOMInputSpec), args["includes"].(model.HasSBOMIncludesInputSpec)), true
 
 	case "Mutation.ingestHasSourceAt":
 		if e.complexity.Mutation.IngestHasSourceAt == nil {
@@ -1630,6 +1697,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Package.Type(childComplexity), true
+
+	case "PackageIDs.packageNameID":
+		if e.complexity.PackageIDs.PackageNameID == nil {
+			break
+		}
+
+		return e.complexity.PackageIDs.PackageNameID(childComplexity), true
+
+	case "PackageIDs.packageNamespaceID":
+		if e.complexity.PackageIDs.PackageNamespaceID == nil {
+			break
+		}
+
+		return e.complexity.PackageIDs.PackageNamespaceID(childComplexity), true
+
+	case "PackageIDs.packageTypeID":
+		if e.complexity.PackageIDs.PackageTypeID == nil {
+			break
+		}
+
+		return e.complexity.PackageIDs.PackageTypeID(childComplexity), true
+
+	case "PackageIDs.packageVersionID":
+		if e.complexity.PackageIDs.PackageVersionID == nil {
+			break
+		}
+
+		return e.complexity.PackageIDs.PackageVersionID(childComplexity), true
 
 	case "PackageName.id":
 		if e.complexity.PackageName.ID == nil {
@@ -2352,6 +2447,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Source.Type(childComplexity), true
 
+	case "SourceIDs.sourceNameID":
+		if e.complexity.SourceIDs.SourceNameID == nil {
+			break
+		}
+
+		return e.complexity.SourceIDs.SourceNameID(childComplexity), true
+
+	case "SourceIDs.sourceNamespaceID":
+		if e.complexity.SourceIDs.SourceNamespaceID == nil {
+			break
+		}
+
+		return e.complexity.SourceIDs.SourceNamespaceID(childComplexity), true
+
+	case "SourceIDs.sourceTypeID":
+		if e.complexity.SourceIDs.SourceTypeID == nil {
+			break
+		}
+
+		return e.complexity.SourceIDs.SourceTypeID(childComplexity), true
+
 	case "SourceName.commit":
 		if e.complexity.SourceName.Commit == nil {
 			break
@@ -2543,6 +2659,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCertifyVulnSpec,
 		ec.unmarshalInputHasMetadataInputSpec,
 		ec.unmarshalInputHasMetadataSpec,
+		ec.unmarshalInputHasSBOMIncludesInputSpec,
 		ec.unmarshalInputHasSBOMInputSpec,
 		ec.unmarshalInputHasSBOMSpec,
 		ec.unmarshalInputHasSLSASpec,
@@ -2676,14 +2793,14 @@ func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapSchema(parsedSchema), nil
+	return introspection.WrapSchema(ec.Schema()), nil
 }
 
 func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 var sources = []*ast.Source{
@@ -2883,6 +3000,7 @@ type CertifyBad {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2895,6 +3013,9 @@ name and one of version, qualifiers, or subpath.
 
 If a source is specified in the subject filter, then it must specify a name,
 and optionally a tag and a commit.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input CertifyBadSpec {
   id: ID
@@ -2902,6 +3023,7 @@ input CertifyBadSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -2912,6 +3034,7 @@ input CertifyBadInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2986,6 +3109,7 @@ type CertifyGood {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 """
@@ -2998,6 +3122,9 @@ name and one of version, qualifiers, or subpath.
 
 If a source is specified in the subject filter, then it must specify a name,
 and optionally a tag and a commit.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input CertifyGoodSpec {
   id: ID
@@ -3005,6 +3132,7 @@ input CertifyGoodSpec {
   justification: String
   origin: String
   collector: String
+  knownSince: Time
 }
 
 """
@@ -3014,6 +3142,7 @@ input CertifyGoodInputSpec {
   justification: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {
@@ -3686,12 +3815,23 @@ type HasSBOM {
   origin: String!
   "GUAC collector for the document"
   collector: String!
+  "Timestamp for SBOM creation"
+  knownSince: Time!
+  "Included packages and artifacts"
+  includedSoftware: [PackageOrArtifact!]!
+  "Included dependencies"
+  includedDependencies: [IsDependency!]!
+  "Included occurrences"
+  includedOccurrences: [IsOccurrence!]!
 }
 
 """
 HasSBOMSpec allows filtering the list of HasSBOM to return.
 
 Only the package or artifact can be added, not both.
+
+If KnownSince is specified, the returned value will be after or equal to the specified time.
+Any nodes time that is before KnownSince is excluded.
 """
 input HasSBOMSpec {
   id: ID
@@ -3702,9 +3842,19 @@ input HasSBOMSpec {
   downloadLocation: String
   origin: String
   collector: String
+  knownSince: Time
+  includedSoftware: [PackageOrArtifactSpec]!
+  includedDependencies: [IsDependencySpec]!
+  includedOccurrences: [IsOccurrenceSpec]!
 }
 
-"HasSBOMInputSpec is the same as HasSBOM but for mutation input."
+input HasSBOMIncludesInputSpec {
+  software: [ID!]!
+  dependencies: [ID!]!
+  occurrences: [ID!]!
+}
+
+"HasSBOMInputSpec is similar to HasSBOM but for mutation input."
 input HasSBOMInputSpec {
   uri: String!
   algorithm: String!
@@ -3712,6 +3862,7 @@ input HasSBOMInputSpec {
   downloadLocation: String!
   origin: String!
   collector: String!
+  knownSince: Time!
 }
 
 extend type Query {
@@ -3724,11 +3875,13 @@ extend type Mutation {
   ingestHasSBOM(
     subject: PackageOrArtifactInput!
     hasSBOM: HasSBOMInputSpec!
+    includes: HasSBOMIncludesInputSpec!
   ): ID!
   "Bulk ingest that package or artifact has an SBOM. The returned array of IDs can be a an array of empty string."
   ingestHasSBOMs(
     subjects: PackageOrArtifactInputs!
     hasSBOMs: [HasSBOMInputSpec!]!
+    includes: [HasSBOMIncludesInputSpec!]!
   ): [ID!]!
 }
 `, BuiltIn: false},
@@ -4548,6 +4701,16 @@ type PackageQualifier {
 }
 
 """
+The IDs of the ingested package
+"""
+type PackageIDs {
+  packageTypeID: ID!
+  packageNamespaceID: ID!
+  packageNameID: ID!
+  packageVersionID: ID!
+}
+
+"""
 PkgSpec allows filtering the list of sources to return in a query.
 
 Each field matches a qualifier from pURL. Use null to match on all values at
@@ -4613,10 +4776,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  "Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string."
-  ingestPackage(pkg: PkgInputSpec!): ID!
-  "Bulk ingests packages and returns the list of corresponding package trie path. The returned array of IDs can be a an array of empty string."
-  ingestPackages(pkgs: [PkgInputSpec!]!): [ID!]!
+  "Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string."
+  ingestPackage(pkg: PkgInputSpec!): PackageIDs!
+  "Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings."
+  ingestPackages(pkgs: [PkgInputSpec!]!): [PackageIDs!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/path.graphql", Input: `#
@@ -4704,8 +4867,14 @@ enum Edge {
   PACKAGE_HAS_SOURCE_AT
   PACKAGE_IS_DEPENDENCY
   PACKAGE_IS_OCCURRENCE
+  PACKAGE_NAME_PACKAGE_NAMESPACE
+  PACKAGE_NAME_PACKAGE_VERSION
+  PACKAGE_NAMESPACE_PACKAGE_NAME
+  PACKAGE_NAMESPACE_PACKAGE_TYPE
   PACKAGE_PKG_EQUAL
   PACKAGE_POINT_OF_CONTACT
+  PACKAGE_TYPE_PACKAGE_NAMESPACE
+  PACKAGE_VERSION_PACKAGE_NAME
   SOURCE_CERTIFY_BAD
   SOURCE_CERTIFY_GOOD
   SOURCE_CERTIFY_LEGAL
@@ -4713,9 +4882,15 @@ enum Edge {
   SOURCE_HAS_METADATA
   SOURCE_HAS_SOURCE_AT
   SOURCE_IS_OCCURRENCE
+  SOURCE_NAME_SOURCE_NAMESPACE
+  SOURCE_NAMESPACE_SOURCE_NAME
+  SOURCE_NAMESPACE_SOURCE_TYPE
   SOURCE_POINT_OF_CONTACT
+  SOURCE_TYPE_SOURCE_NAMESPACE
   VULNERABILITY_CERTIFY_VEX_STATEMENT
   VULNERABILITY_CERTIFY_VULN
+  VULNERABILITY_ID_VULNERABILITY_TYPE
+  VULNERABILITY_TYPE_VULNERABILITY_ID
   VULNERABILITY_VULN_EQUAL
   VULNERABILITY_VULN_METADATA
 
@@ -4740,6 +4915,9 @@ enum Edge {
   HAS_METADATA_SOURCE
   HAS_SBOM_ARTIFACT
   HAS_SBOM_PACKAGE
+  HAS_SBOM_INCLUDED_SOFTWARE
+  HAS_SBOM_INCLUDED_DEPENDENCIES
+  HAS_SBOM_INCLUDED_OCCURRENCES
   HAS_SLSA_BUILT_BY
   HAS_SLSA_MATERIALS
   HAS_SLSA_SUBJECT
@@ -4978,6 +5156,15 @@ type SourceName {
 }
 
 """
+The IDs of the ingested pacsourcekage
+"""
+type SourceIDs {
+  sourceTypeID: ID!
+  sourceNamespaceID: ID!
+  sourceNameID: ID!
+}
+
+"""
 SourceSpec allows filtering the list of sources to return in a query.
 
 Empty string at a field means matching with the empty string. Missing field
@@ -5021,9 +5208,9 @@ extend type Query {
 
 extend type Mutation {
   "Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string."
-  ingestSource(source: SourceInputSpec!): ID!
+  ingestSource(source: SourceInputSpec!): SourceIDs!
   "Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string."
-  ingestSources(sources: [SourceInputSpec!]!): [ID!]!
+  ingestSources(sources: [SourceInputSpec!]!): [SourceIDs!]!
 }
 `, BuiltIn: false},
 	{Name: "../schema/vulnEqual.graphql", Input: `#

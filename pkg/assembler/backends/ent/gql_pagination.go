@@ -21,6 +21,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/certifyvuln"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/dependency"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hashequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/hasmetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/hassourceat"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/isvulnerability"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/license"
@@ -30,6 +31,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packagetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/packageversion"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/pkgequal"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/pointofcontact"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/scorecard"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/slsaattestation"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcename"
@@ -37,6 +39,7 @@ import (
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/sourcetype"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnequal"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilityid"
+	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitymetadata"
 	"github.com/guacsec/guac/pkg/assembler/backends/ent/vulnerabilitytype"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -2332,6 +2335,252 @@ func (d *Dependency) ToEdge(order *DependencyOrder) *DependencyEdge {
 	return &DependencyEdge{
 		Node:   d,
 		Cursor: order.Field.toCursor(d),
+	}
+}
+
+// HasMetadataEdge is the edge representation of HasMetadata.
+type HasMetadataEdge struct {
+	Node   *HasMetadata `json:"node"`
+	Cursor Cursor       `json:"cursor"`
+}
+
+// HasMetadataConnection is the connection containing edges to HasMetadata.
+type HasMetadataConnection struct {
+	Edges      []*HasMetadataEdge `json:"edges"`
+	PageInfo   PageInfo           `json:"pageInfo"`
+	TotalCount int                `json:"totalCount"`
+}
+
+func (c *HasMetadataConnection) build(nodes []*HasMetadata, pager *hasmetadataPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *HasMetadata
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *HasMetadata {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *HasMetadata {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*HasMetadataEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &HasMetadataEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// HasMetadataPaginateOption enables pagination customization.
+type HasMetadataPaginateOption func(*hasmetadataPager) error
+
+// WithHasMetadataOrder configures pagination ordering.
+func WithHasMetadataOrder(order *HasMetadataOrder) HasMetadataPaginateOption {
+	if order == nil {
+		order = DefaultHasMetadataOrder
+	}
+	o := *order
+	return func(pager *hasmetadataPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultHasMetadataOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithHasMetadataFilter configures pagination filter.
+func WithHasMetadataFilter(filter func(*HasMetadataQuery) (*HasMetadataQuery, error)) HasMetadataPaginateOption {
+	return func(pager *hasmetadataPager) error {
+		if filter == nil {
+			return errors.New("HasMetadataQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type hasmetadataPager struct {
+	reverse bool
+	order   *HasMetadataOrder
+	filter  func(*HasMetadataQuery) (*HasMetadataQuery, error)
+}
+
+func newHasMetadataPager(opts []HasMetadataPaginateOption, reverse bool) (*hasmetadataPager, error) {
+	pager := &hasmetadataPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultHasMetadataOrder
+	}
+	return pager, nil
+}
+
+func (p *hasmetadataPager) applyFilter(query *HasMetadataQuery) (*HasMetadataQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *hasmetadataPager) toCursor(hm *HasMetadata) Cursor {
+	return p.order.Field.toCursor(hm)
+}
+
+func (p *hasmetadataPager) applyCursors(query *HasMetadataQuery, after, before *Cursor) (*HasMetadataQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultHasMetadataOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *hasmetadataPager) applyOrder(query *HasMetadataQuery) *HasMetadataQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultHasMetadataOrder.Field {
+		query = query.Order(DefaultHasMetadataOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *hasmetadataPager) orderExpr(query *HasMetadataQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultHasMetadataOrder.Field {
+			b.Comma().Ident(DefaultHasMetadataOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to HasMetadata.
+func (hm *HasMetadataQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...HasMetadataPaginateOption,
+) (*HasMetadataConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newHasMetadataPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if hm, err = pager.applyFilter(hm); err != nil {
+		return nil, err
+	}
+	conn := &HasMetadataConnection{Edges: []*HasMetadataEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = hm.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if hm, err = pager.applyCursors(hm, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		hm.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := hm.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	hm = pager.applyOrder(hm)
+	nodes, err := hm.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// HasMetadataOrderField defines the ordering field of HasMetadata.
+type HasMetadataOrderField struct {
+	// Value extracts the ordering value from the given HasMetadata.
+	Value    func(*HasMetadata) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) hasmetadata.OrderOption
+	toCursor func(*HasMetadata) Cursor
+}
+
+// HasMetadataOrder defines the ordering of HasMetadata.
+type HasMetadataOrder struct {
+	Direction OrderDirection         `json:"direction"`
+	Field     *HasMetadataOrderField `json:"field"`
+}
+
+// DefaultHasMetadataOrder is the default ordering of HasMetadata.
+var DefaultHasMetadataOrder = &HasMetadataOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &HasMetadataOrderField{
+		Value: func(hm *HasMetadata) (ent.Value, error) {
+			return hm.ID, nil
+		},
+		column: hasmetadata.FieldID,
+		toTerm: hasmetadata.ByID,
+		toCursor: func(hm *HasMetadata) Cursor {
+			return Cursor{ID: hm.ID}
+		},
+	},
+}
+
+// ToEdge converts HasMetadata into HasMetadataEdge.
+func (hm *HasMetadata) ToEdge(order *HasMetadataOrder) *HasMetadataEdge {
+	if order == nil {
+		order = DefaultHasMetadataOrder
+	}
+	return &HasMetadataEdge{
+		Node:   hm,
+		Cursor: order.Field.toCursor(hm),
 	}
 }
 
@@ -4795,6 +5044,252 @@ func (pe *PkgEqual) ToEdge(order *PkgEqualOrder) *PkgEqualEdge {
 	}
 }
 
+// PointOfContactEdge is the edge representation of PointOfContact.
+type PointOfContactEdge struct {
+	Node   *PointOfContact `json:"node"`
+	Cursor Cursor          `json:"cursor"`
+}
+
+// PointOfContactConnection is the connection containing edges to PointOfContact.
+type PointOfContactConnection struct {
+	Edges      []*PointOfContactEdge `json:"edges"`
+	PageInfo   PageInfo              `json:"pageInfo"`
+	TotalCount int                   `json:"totalCount"`
+}
+
+func (c *PointOfContactConnection) build(nodes []*PointOfContact, pager *pointofcontactPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *PointOfContact
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *PointOfContact {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *PointOfContact {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*PointOfContactEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &PointOfContactEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// PointOfContactPaginateOption enables pagination customization.
+type PointOfContactPaginateOption func(*pointofcontactPager) error
+
+// WithPointOfContactOrder configures pagination ordering.
+func WithPointOfContactOrder(order *PointOfContactOrder) PointOfContactPaginateOption {
+	if order == nil {
+		order = DefaultPointOfContactOrder
+	}
+	o := *order
+	return func(pager *pointofcontactPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultPointOfContactOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithPointOfContactFilter configures pagination filter.
+func WithPointOfContactFilter(filter func(*PointOfContactQuery) (*PointOfContactQuery, error)) PointOfContactPaginateOption {
+	return func(pager *pointofcontactPager) error {
+		if filter == nil {
+			return errors.New("PointOfContactQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type pointofcontactPager struct {
+	reverse bool
+	order   *PointOfContactOrder
+	filter  func(*PointOfContactQuery) (*PointOfContactQuery, error)
+}
+
+func newPointOfContactPager(opts []PointOfContactPaginateOption, reverse bool) (*pointofcontactPager, error) {
+	pager := &pointofcontactPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultPointOfContactOrder
+	}
+	return pager, nil
+}
+
+func (p *pointofcontactPager) applyFilter(query *PointOfContactQuery) (*PointOfContactQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *pointofcontactPager) toCursor(poc *PointOfContact) Cursor {
+	return p.order.Field.toCursor(poc)
+}
+
+func (p *pointofcontactPager) applyCursors(query *PointOfContactQuery, after, before *Cursor) (*PointOfContactQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultPointOfContactOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *pointofcontactPager) applyOrder(query *PointOfContactQuery) *PointOfContactQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultPointOfContactOrder.Field {
+		query = query.Order(DefaultPointOfContactOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *pointofcontactPager) orderExpr(query *PointOfContactQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultPointOfContactOrder.Field {
+			b.Comma().Ident(DefaultPointOfContactOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to PointOfContact.
+func (poc *PointOfContactQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...PointOfContactPaginateOption,
+) (*PointOfContactConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newPointOfContactPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if poc, err = pager.applyFilter(poc); err != nil {
+		return nil, err
+	}
+	conn := &PointOfContactConnection{Edges: []*PointOfContactEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = poc.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if poc, err = pager.applyCursors(poc, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		poc.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := poc.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	poc = pager.applyOrder(poc)
+	nodes, err := poc.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// PointOfContactOrderField defines the ordering field of PointOfContact.
+type PointOfContactOrderField struct {
+	// Value extracts the ordering value from the given PointOfContact.
+	Value    func(*PointOfContact) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) pointofcontact.OrderOption
+	toCursor func(*PointOfContact) Cursor
+}
+
+// PointOfContactOrder defines the ordering of PointOfContact.
+type PointOfContactOrder struct {
+	Direction OrderDirection            `json:"direction"`
+	Field     *PointOfContactOrderField `json:"field"`
+}
+
+// DefaultPointOfContactOrder is the default ordering of PointOfContact.
+var DefaultPointOfContactOrder = &PointOfContactOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &PointOfContactOrderField{
+		Value: func(poc *PointOfContact) (ent.Value, error) {
+			return poc.ID, nil
+		},
+		column: pointofcontact.FieldID,
+		toTerm: pointofcontact.ByID,
+		toCursor: func(poc *PointOfContact) Cursor {
+			return Cursor{ID: poc.ID}
+		},
+	},
+}
+
+// ToEdge converts PointOfContact into PointOfContactEdge.
+func (poc *PointOfContact) ToEdge(order *PointOfContactOrder) *PointOfContactEdge {
+	if order == nil {
+		order = DefaultPointOfContactOrder
+	}
+	return &PointOfContactEdge{
+		Node:   poc,
+		Cursor: order.Field.toCursor(poc),
+	}
+}
+
 // SLSAAttestationEdge is the edge representation of SLSAAttestation.
 type SLSAAttestationEdge struct {
 	Node   *SLSAAttestation `json:"node"`
@@ -6514,6 +7009,252 @@ func (vi *VulnerabilityID) ToEdge(order *VulnerabilityIDOrder) *VulnerabilityIDE
 	return &VulnerabilityIDEdge{
 		Node:   vi,
 		Cursor: order.Field.toCursor(vi),
+	}
+}
+
+// VulnerabilityMetadataEdge is the edge representation of VulnerabilityMetadata.
+type VulnerabilityMetadataEdge struct {
+	Node   *VulnerabilityMetadata `json:"node"`
+	Cursor Cursor                 `json:"cursor"`
+}
+
+// VulnerabilityMetadataConnection is the connection containing edges to VulnerabilityMetadata.
+type VulnerabilityMetadataConnection struct {
+	Edges      []*VulnerabilityMetadataEdge `json:"edges"`
+	PageInfo   PageInfo                     `json:"pageInfo"`
+	TotalCount int                          `json:"totalCount"`
+}
+
+func (c *VulnerabilityMetadataConnection) build(nodes []*VulnerabilityMetadata, pager *vulnerabilitymetadataPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *VulnerabilityMetadata
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *VulnerabilityMetadata {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *VulnerabilityMetadata {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*VulnerabilityMetadataEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &VulnerabilityMetadataEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// VulnerabilityMetadataPaginateOption enables pagination customization.
+type VulnerabilityMetadataPaginateOption func(*vulnerabilitymetadataPager) error
+
+// WithVulnerabilityMetadataOrder configures pagination ordering.
+func WithVulnerabilityMetadataOrder(order *VulnerabilityMetadataOrder) VulnerabilityMetadataPaginateOption {
+	if order == nil {
+		order = DefaultVulnerabilityMetadataOrder
+	}
+	o := *order
+	return func(pager *vulnerabilitymetadataPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultVulnerabilityMetadataOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithVulnerabilityMetadataFilter configures pagination filter.
+func WithVulnerabilityMetadataFilter(filter func(*VulnerabilityMetadataQuery) (*VulnerabilityMetadataQuery, error)) VulnerabilityMetadataPaginateOption {
+	return func(pager *vulnerabilitymetadataPager) error {
+		if filter == nil {
+			return errors.New("VulnerabilityMetadataQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type vulnerabilitymetadataPager struct {
+	reverse bool
+	order   *VulnerabilityMetadataOrder
+	filter  func(*VulnerabilityMetadataQuery) (*VulnerabilityMetadataQuery, error)
+}
+
+func newVulnerabilityMetadataPager(opts []VulnerabilityMetadataPaginateOption, reverse bool) (*vulnerabilitymetadataPager, error) {
+	pager := &vulnerabilitymetadataPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultVulnerabilityMetadataOrder
+	}
+	return pager, nil
+}
+
+func (p *vulnerabilitymetadataPager) applyFilter(query *VulnerabilityMetadataQuery) (*VulnerabilityMetadataQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *vulnerabilitymetadataPager) toCursor(vm *VulnerabilityMetadata) Cursor {
+	return p.order.Field.toCursor(vm)
+}
+
+func (p *vulnerabilitymetadataPager) applyCursors(query *VulnerabilityMetadataQuery, after, before *Cursor) (*VulnerabilityMetadataQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultVulnerabilityMetadataOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *vulnerabilitymetadataPager) applyOrder(query *VulnerabilityMetadataQuery) *VulnerabilityMetadataQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultVulnerabilityMetadataOrder.Field {
+		query = query.Order(DefaultVulnerabilityMetadataOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *vulnerabilitymetadataPager) orderExpr(query *VulnerabilityMetadataQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultVulnerabilityMetadataOrder.Field {
+			b.Comma().Ident(DefaultVulnerabilityMetadataOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to VulnerabilityMetadata.
+func (vm *VulnerabilityMetadataQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...VulnerabilityMetadataPaginateOption,
+) (*VulnerabilityMetadataConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newVulnerabilityMetadataPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if vm, err = pager.applyFilter(vm); err != nil {
+		return nil, err
+	}
+	conn := &VulnerabilityMetadataConnection{Edges: []*VulnerabilityMetadataEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = vm.Clone().Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if vm, err = pager.applyCursors(vm, after, before); err != nil {
+		return nil, err
+	}
+	if limit := paginateLimit(first, last); limit != 0 {
+		vm.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := vm.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	vm = pager.applyOrder(vm)
+	nodes, err := vm.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// VulnerabilityMetadataOrderField defines the ordering field of VulnerabilityMetadata.
+type VulnerabilityMetadataOrderField struct {
+	// Value extracts the ordering value from the given VulnerabilityMetadata.
+	Value    func(*VulnerabilityMetadata) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) vulnerabilitymetadata.OrderOption
+	toCursor func(*VulnerabilityMetadata) Cursor
+}
+
+// VulnerabilityMetadataOrder defines the ordering of VulnerabilityMetadata.
+type VulnerabilityMetadataOrder struct {
+	Direction OrderDirection                   `json:"direction"`
+	Field     *VulnerabilityMetadataOrderField `json:"field"`
+}
+
+// DefaultVulnerabilityMetadataOrder is the default ordering of VulnerabilityMetadata.
+var DefaultVulnerabilityMetadataOrder = &VulnerabilityMetadataOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &VulnerabilityMetadataOrderField{
+		Value: func(vm *VulnerabilityMetadata) (ent.Value, error) {
+			return vm.ID, nil
+		},
+		column: vulnerabilitymetadata.FieldID,
+		toTerm: vulnerabilitymetadata.ByID,
+		toCursor: func(vm *VulnerabilityMetadata) Cursor {
+			return Cursor{ID: vm.ID}
+		},
+	},
+}
+
+// ToEdge converts VulnerabilityMetadata into VulnerabilityMetadataEdge.
+func (vm *VulnerabilityMetadata) ToEdge(order *VulnerabilityMetadataOrder) *VulnerabilityMetadataEdge {
+	if order == nil {
+		order = DefaultVulnerabilityMetadataOrder
+	}
+	return &VulnerabilityMetadataEdge{
+		Node:   vm,
+		Cursor: order.Field.toCursor(vm),
 	}
 }
 

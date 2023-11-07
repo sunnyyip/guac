@@ -18,9 +18,8 @@ package testdata
 import (
 	_ "embed"
 	"encoding/base64"
+	"fmt"
 	"time"
-
-	jsoniter "github.com/json-iterator/go"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -33,6 +32,7 @@ import (
 	"github.com/guacsec/guac/pkg/certifier/components/root_package"
 	"github.com/guacsec/guac/pkg/handler/processor"
 	"github.com/guacsec/guac/pkg/ingestor/parser/common"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/secure-systems-lab/go-securesystemslib/dsse"
 )
 
@@ -120,6 +120,33 @@ var (
 	//go:embed exampledata/certify-novuln.json
 	ITE6NoVulnExample []byte
 
+	//go:embed exampledata/oci-kubectl-linux-amd64-in-toto.json
+	OCIKubectlLinuxAMD64ITE6 []byte
+
+	//go:embed exampledata/oci-kubectl-linux-amd64-spdx.json
+	OCIKubectlLinuxAMD64SPDX []byte
+
+	//go:embed exampledata/oci-kubectl-linux-amd64-spdx-1.json
+	OCIKubectlLinuxAMD64SPDX1 []byte
+
+	//go:embed exampledata/oci-kubectl-linux-arm-v7-in-toto.json
+	OCIKubectlLinuxARMV7ITE6 []byte
+
+	//go:embed exampledata/oci-kubectl-linux-arm-v7-spdx.json
+	OCIKubectlLinuxARMV7SPDX []byte
+
+	//go:embed exampledata/oci-kubectl-linux-arm64-in-toto.json
+	OCIKubectlLinuxARM64ITE6 []byte
+
+	//go:embed exampledata/oci-kubectl-linux-arm64-spdx.json
+	OCIKubectlLinuxARM64SPDX []byte
+
+	//go:embed exampledata/oci-kubectl-linux-arm64-spdx-1.json
+	OCIKubectlLinuxARM64SPDX1 []byte
+
+	//go:embed exampledata/oci-kubectl-windows-amd64-in-toto.json
+	OCIKubectlWindowsAMD64ITE6 []byte
+
 	//go:embed exampledata/oci-dsse-att.json
 	OCIDsseAttExample []byte
 
@@ -154,7 +181,7 @@ var (
 				Status:           generated.VexStatusNotAffected,
 				VexJustification: generated.VexJustificationVulnerableCodeNotInExecutePath,
 				Statement:        "Automated dataflow analysis and manual code review indicates that the vulnerable code is not reachable, either directly or indirectly.",
-				StatusNotes:      "not_affected:code_not_reachable",
+				StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusNotAffected, generated.VexJustificationVulnerableCodeNotInExecutePath),
 				KnownSince:       parseUTCTime("2020-12-03T00:00:00.000Z"),
 			},
 		},
@@ -185,51 +212,43 @@ var (
 			},
 		},
 	}
+	CycloneDXUnAffectedPredicates = assembler.IngestPredicates{
+		VulnMetadata: CycloneDXUnAffectedVulnMetadata,
+		Vex:          CycloneDXUnAffectedVexIngest,
+	}
 
-	// CycloneDX VEX testdata in triage
-	pkg1, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.4")
-	pkg2, _ = asmhelpers.PurlToPkg("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.6")
-
-	vulnSpecAffected = &generated.VulnerabilityInputSpec{
+	// CycloneDX VEX testdata affected packages.
+	VulnSpecAffected = &generated.VulnerabilityInputSpec{
 		Type:            "cve",
 		VulnerabilityID: "cve-2021-44228",
 	}
-	vexDataAffected = &generated.VexStatementInputSpec{
-		Status:      generated.VexStatusAffected,
-		Statement:   "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
-		StatusNotes: "exploitable:",
-	}
-	CycloneDXAffectedVexIngest = []assembler.VexIngest{
-		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VexData:       vexDataAffected,
-		},
+	VexDataAffected = &generated.VexStatementInputSpec{
+		Status:           generated.VexStatusAffected,
+		VexJustification: generated.VexJustificationNotProvided,
+		Statement:        "Versions of Product ABC are affected by the vulnerability. Customers are advised to upgrade to the latest release.",
+		StatusNotes:      fmt.Sprintf("%s:%s", generated.VexStatusAffected, generated.VexJustificationNotProvided),
+		KnownSince:       time.Unix(0, 0),
 	}
 	CycloneDXAffectedVulnMetadata = []assembler.VulnMetadataIngest{
 		{
-			Vulnerability: vulnSpecAffected,
+			Vulnerability: VulnSpecAffected,
 			VulnMetadata: &generated.VulnerabilityMetadataInputSpec{
 				ScoreType:  generated.VulnerabilityScoreTypeCvssv31,
 				ScoreValue: 10,
+				Timestamp:  time.Unix(0, 0),
 			},
 		},
 	}
-	CycloneDXAffectedCertifyVuln = []assembler.CertifyVulnIngest{
+
+	topLevelPkg, _     = asmhelpers.PurlToPkg("pkg:guac/cdx/ABC")
+	HasSBOMVexAffected = []assembler.HasSBOMIngest{
 		{
-			Pkg:           pkg1,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
-		},
-		{
-			Pkg:           pkg2,
-			Vulnerability: vulnSpecAffected,
-			VulnData:      &generated.ScanMetadataInput{},
+			Pkg: topLevelPkg,
+			HasSBOM: &model.HasSBOMInputSpec{
+				Algorithm:  "sha256",
+				Digest:     "eb62836ed6339a2d57f66d2e42509718fd480a1befea83f925e918444c369114",
+				KnownSince: parseRfc3339("2022-03-03T00:00:00Z"),
+			},
 		},
 	}
 
@@ -725,14 +744,17 @@ var (
 		},
 	}
 
+	spdxTime, _ = time.Parse(time.RFC3339, "2022-09-24T17:27:55.556104Z")
+
 	SpdxHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: topLevelPack,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "https://anchore.com/syft/image/alpine-latest-e78eca08-d9f4-49c7-97e0-6d4b9bfa99c2",
 				Algorithm:        "sha256",
 				Digest:           "8b5e8212cae084f92ff91f8625a50ea1070738cfc68ecca08bf04d64f64b9feb",
 				DownloadLocation: "TestSource",
+				KnownSince:       spdxTime,
 			},
 		},
 	}
@@ -803,10 +825,102 @@ var (
 		},
 	}
 
+	SpdxHasMetadata = []assembler.HasMetadataIngest{
+		{
+			Pkg:          baselayoutPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutdataPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout-data:alpine-baselayout-data:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          baselayoutdataPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-baselayout-data:alpine_baselayout_data:3.2.0-r22:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-keys:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine-keys:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine:alpine-keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+		{
+			Pkg:          keysPack,
+			PkgMatchFlag: model.MatchFlags{Pkg: model.PkgMatchTypeSpecificVersion},
+			HasMetadata: &model.HasMetadataInputSpec{
+				Key:           "cpe",
+				Value:         "cpe:2.3:a:alpine:alpine_keys:2.4-r1:*:*:*:*:*:*:*",
+				Justification: "spdx cpe external reference",
+				Origin:        "GUAC SPDX",
+				Collector:     "GUAC",
+			},
+		},
+	}
+
 	SpdxIngestionPredicates = assembler.IngestPredicates{
 		IsDependency: SpdxDeps,
 		IsOccurrence: SpdxOccurences,
 		HasSBOM:      SpdxHasSBOM,
+		HasMetadata:  SpdxHasMetadata,
 		CertifyLegal: SpdxCertifyLegal,
 	}
 
@@ -852,14 +966,17 @@ var (
 		},
 	}
 
+	cdxTime, _ = time.Parse(time.RFC3339, "2022-10-08T10:01:23-04:00")
+
 	CdxHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxTopLevelPack,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "urn:uuid:6a44e622-2983-4566-bf90-f87b6103ebaf",
 				Algorithm:        "sha256",
 				Digest:           "01942b5eefd3c15b50318c66d8d16627be573197c877e8a286a8cb12de7939cb",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxTime,
 			},
 		},
 	}
@@ -916,7 +1033,8 @@ var (
 				Digest:    "85240ed8faa3cc4493db96d0223094842e7153890b091ff364040ad3ad89363157fc9d1bd852262124aec83134f0c19aa4fd0fa482031d38a76d74dfd36b7964",
 			},
 			IsOccurrence: isOccurrenceJustifyTopPkg,
-		}, {
+		},
+		{
 			Pkg: cdxResteasyPack,
 			Artifact: &model.ArtifactInputSpec{
 				Algorithm: "md5",
@@ -942,14 +1060,17 @@ var (
 		},
 	}
 
+	cdxQuarkusTime, _ = time.Parse(time.RFC3339, "2022-11-09T11:14:31Z")
+
 	CdxQuarkusHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxTopQuarkusPack,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "urn:uuid:0697952e-9848-4785-95bf-f81ff9731682",
 				Algorithm:        "sha256",
 				Digest:           "036a9f51468f5ce6eec7c310583164ed0ab9f58d7c03380a3fe19d420609e3de",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxQuarkusTime,
 			},
 		},
 	}
@@ -977,14 +1098,17 @@ var (
 		},
 	}
 
+	cdxNpmTime, _ = time.Parse(time.RFC3339, "2022-11-22T17:14:57Z")
+
 	CdxNpmHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: cdxWebAppPackage,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "",
 				Algorithm:        "sha256",
 				Digest:           "35363f03c80f26a88db6f2400771bdcc6624bb7b61b96da8503be0f757605fde",
 				DownloadLocation: "TestSource",
+				KnownSince:       cdxNpmTime,
 			},
 		},
 	}
@@ -995,15 +1119,17 @@ var (
 	}
 
 	quarkusParentPackage, _ = asmhelpers.PurlToPkg("pkg:maven/io.quarkus/quarkus-parent@999-SNAPSHOT?type=pom")
+	quarkusTime, _          = time.Parse(time.RFC3339, "2023-02-16T21:52:02Z")
 
 	quarkusParentPackageHasSBOM = []assembler.HasSBOMIngest{
 		{
 			Pkg: quarkusParentPackage,
 			HasSBOM: &model.HasSBOMInputSpec{
-				Uri:              "TestSource",
+				Uri:              "urn:uuid:8a689387-e9b4-4ba2-835c-a2c3dde6181d",
 				Algorithm:        "sha256",
 				Digest:           "fcd4d1f9c83c274fbc2dabdca4e7de749b23fab1aa15dc2854880a13479fa74e",
 				DownloadLocation: "TestSource",
+				KnownSince:       quarkusTime,
 			},
 		},
 	}
@@ -1307,258 +1433,74 @@ var (
 	// Deps.dev
 
 	CollectedPypiWheelAxle = `{
-	   "CurrentPackage":{
-		  "type":"pypi",
-		  "namespace":"",
-		  "name":"wheel-axle-runtime",
-		  "version":"0.0.4.dev20230415195356",
-		  "qualifiers":null,
-		  "subpath":""
-	   },
-	   "Source":{
-		  "type":"git",
-		  "namespace":"github.com/karellen",
-		  "name":"wheel-axle-runtime",
-		  "tag":null,
-		  "commit":null
-	   },
-	   "Scorecard":{
-		  "checks":[
-			 {
-				"check":"Maintained",
-				"score":5
-			 },
-			 {
-				"check":"Code-Review",
-				"score":0
-			 },
-			 {
-				"check":"CII-Best-Practices",
-				"score":0
-			 },
-			 {
-				"check":"License",
-				"score":10
-			 },
-			 {
-				"check":"Branch-Protection",
-				"score":-1
-			 },
-			 {
-				"check":"Signed-Releases",
-				"score":-1
-			 },
-			 {
-				"check":"Dangerous-Workflow",
-				"score":10
-			 },
-			 {
-				"check":"Binary-Artifacts",
-				"score":9
-			 },
-			 {
-				"check":"Packaging",
-				"score":-1
-			 },
-			 {
-				"check":"Token-Permissions",
-				"score":0
-			 },
-			 {
-				"check":"Pinned-Dependencies",
-				"score":8
-			 },
-			 {
-				"check":"Fuzzing",
-				"score":0
-			 },
-			 {
-				"check":"Vulnerabilities",
-				"score":10
-			 },
-			 {
-				"check":"Security-Policy",
-				"score":0
-			 },
-			 {
-				"check":"SAST",
-				"score":0
-			 }
-		  ],
-		  "aggregateScore":4.800000190734863,
-		  "timeScanned":"2023-08-21T00:00:00Z",
-		  "scorecardVersion":"v4.12.0-29-gf05496b9",
-		  "scorecardCommit":"f05496b9942a18b5914ddb10af067af6b3e74b9d",
-		  "origin":"",
-		  "collector":""
-	   },
-	   "IsDepPackages":[
-		  {
-			 "CurrentPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"wheel-axle-runtime",
-				"version":"0.0.4.dev20230415195356",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "DepPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"filelock",
-				"version":"3.12.3",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "IsDependency":{
-				"versionRange":"",
-				"dependencyType":"DIRECT",
-				"justification":"dependency data collected via deps.dev",
-				"origin":"",
-				"collector":""
-			 }
-		  },
-		  {
-			 "CurrentPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"filelock",
-				"version":"3.12.3",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "DepPackageInput":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"typing-extensions",
-				"version":"4.7.1",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "IsDependency":{
-				"versionRange":"\u003e=4.7.1",
-				"dependencyType":"DIRECT",
-				"justification":"dependency data collected via deps.dev",
-				"origin":"",
-				"collector":""
-			 }
-		  }
-	   ],
-	   "DepPackages":[
-		  {
-			 "CurrentPackage":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"filelock",
-				"version":"3.12.3",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "Source":{
-				"type":"git",
-				"namespace":"github.com/tox-dev",
-				"name":"py-filelock",
-				"tag":null,
-				"commit":null
-			 },
-			 "Scorecard":{
-				"checks":[
-				   {
-					  "check":"Code-Review",
-					  "score":2
-				   },
-				   {
-					  "check":"Maintained",
-					  "score":10
-				   },
-				   {
-					  "check":"CII-Best-Practices",
-					  "score":0
-				   },
-				   {
-					  "check":"License",
-					  "score":9
-				   },
-				   {
-					  "check":"Branch-Protection",
-					  "score":-1
-				   },
-				   {
-					  "check":"Signed-Releases",
-					  "score":-1
-				   },
-				   {
-					  "check":"Security-Policy",
-					  "score":10
-				   },
-				   {
-					  "check":"Binary-Artifacts",
-					  "score":10
-				   },
-				   {
-					  "check":"Dangerous-Workflow",
-					  "score":10
-				   },
-				   {
-					  "check":"Token-Permissions",
-					  "score":0
-				   },
-				   {
-					  "check":"Pinned-Dependencies",
-					  "score":6
-				   },
-				   {
-					  "check":"Vulnerabilities",
-					  "score":10
-				   },
-				   {
-					  "check":"Fuzzing",
-					  "score":0
-				   },
-				   {
-					  "check":"Packaging",
-					  "score":10
-				   },
-				   {
-					  "check":"SAST",
-					  "score":0
-				   }
-				],
-				"aggregateScore":6.400000095367432,
-				"timeScanned":"2023-08-21T00:00:00Z",
-				"scorecardVersion":"v4.12.0-29-gf05496b9",
-				"scorecardCommit":"f05496b9942a18b5914ddb10af067af6b3e74b9d",
-				"origin":"",
-				"collector":""
-			 },
-			 "IsDepPackages":null,
-			 "DepPackages":null,
-			 "UpdateTime":"2023-08-29T12:50:53.228040583Z"
-		  },
-		  {
-			 "CurrentPackage":{
-				"type":"pypi",
-				"namespace":"",
-				"name":"typing-extensions",
-				"version":"4.7.1",
-				"qualifiers":null,
-				"subpath":""
-			 },
-			 "Source":{
-				"type":"git",
-				"namespace":"github.com/python",
-				"name":"typing_extensions",
-				"tag":null,
-				"commit":null
-			 },
-			 "Scorecard":null,
-			 "IsDepPackages":null,
-			 "DepPackages":null,
-			 "UpdateTime":"2023-08-29T12:50:53.308617853Z"
-		  }
-	   ],
-	   "UpdateTime":"2023-08-29T12:50:53.081287053Z"
-	}`
+   "CurrentPackage":{
+      "name":"wheel-axle-runtime",
+      "namespace":"",
+      "qualifiers":null,
+      "subpath":"",
+      "type":"pypi",
+      "version":"0.0.4"
+   },
+   "DepPackages":[
+      {
+         "CurrentPackage":{
+            "name":"filelock",
+            "namespace":"",
+            "qualifiers":null,
+            "subpath":"",
+            "type":"pypi",
+            "version":null
+         },
+         "DepPackages":null,
+         "IsDepPackages":null,
+         "Scorecard":null,
+         "Source":{
+            "commit":null,
+            "name":"py-filelock",
+            "namespace":"github.com/tox-dev",
+            "tag":null,
+            "type":"git"
+         },
+         "UpdateTime":"2022-11-21T17:45:50.52Z"
+      }
+   ],
+   "IsDepPackages":[
+      {
+         "CurrentPackageInput":{
+            "name":"wheel-axle-runtime",
+            "namespace":"",
+            "qualifiers":null,
+            "subpath":"",
+            "type":"pypi",
+            "version":null
+         },
+         "DepPackageInput":{
+            "name":"filelock",
+            "namespace":"",
+            "qualifiers":null,
+            "subpath":"",
+            "type":"pypi",
+            "version":null
+         },
+         "IsDependency":{
+            "collector":"",
+            "dependencyType":"DIRECT",
+            "justification":"dependency data collected via deps.dev",
+            "origin":"",
+            "versionRange":""
+         }
+      }
+   ],
+   "Scorecard":null,
+   "Source":{
+      "commit":null,
+      "name":"wheel-axle-runtime",
+      "namespace":"github.com/karellen",
+      "tag":null,
+      "type":"git"
+   },
+   "UpdateTime":"2022-11-21T17:45:50.52Z"
+}`
 
 	CollectedMavenWebJars = `{
 		"CurrentPackage":{
@@ -1882,6 +1824,86 @@ var (
 		"UpdateTime":"2022-11-21T17:45:50.52Z"
 	 }`
 
+	CollectedForeignTypesNoDeps = `{
+		"CurrentPackage":{
+		   "name":"foreign-types",
+		   "namespace":"",
+		   "qualifiers":null,
+		   "subpath":"",
+		   "type":"cargo",
+		   "version":"0.3.2"
+		},
+		"Scorecard":{
+		   "aggregateScore":4.599999904632568,
+		   "checks":[
+			  {
+				 "check":"Maintained",
+				 "score":5
+			  },
+			  {
+				 "check":"CII-Best-Practices",
+				 "score":0
+			  },
+			  {
+				 "check":"Signed-Releases",
+				 "score":-1
+			  },
+			  {
+				 "check":"Packaging",
+				 "score":-1
+			  },
+			  {
+				 "check":"Dangerous-Workflow",
+				 "score":10
+			  },
+			  {
+				 "check":"Binary-Artifacts",
+				 "score":10
+			  },
+			  {
+				 "check":"Token-Permissions",
+				 "score":0
+			  },
+			  {
+				 "check":"Pinned-Dependencies",
+				 "score":7
+			  },
+			  {
+				 "check":"Fuzzing",
+				 "score":0
+			  },
+			  {
+				 "check":"Vulnerabilities",
+				 "score":10
+			  },
+			  {
+				 "check":"Branch-Protection",
+				 "score":0
+			  },
+			  {
+				 "check":"License",
+				 "score":10
+			  },
+			  {
+				 "check":"Security-Policy",
+				 "score":0
+			  }
+		   ],
+		   "collector":"",
+		   "origin":"",
+		   "scorecardCommit":"6c5de2c32a4b8f60211e8e8eb94f8d3370a11b93",
+		   "scorecardVersion":"v4.10.5-77-g6c5de2c",
+		   "timeScanned":"2022-11-21T17:45:50.52Z"
+		},
+		"Source":{
+		   "commit":null,
+		   "name":"foreign-types",
+		   "namespace":"github.com/sfackler",
+		   "tag":null,
+		   "type":"git"
+		},
+		"UpdateTime":"2022-11-21T17:45:50.52Z"
+	 }`
 	CollectedForeignTypes = `{
 		"CurrentPackage":{
 		   "name":"foreign-types",
@@ -2800,6 +2822,7 @@ var IngestPredicatesCmpOpts = []cmp.Option{
 	cmpopts.SortSlices(slsaPredicateInputSpecLess),
 	cmpopts.SortSlices(certifyLegalInputSpecLess),
 	cmpopts.SortSlices(licenseInputSpecLess),
+	cmpopts.SortSlices(hasMetadataLess),
 }
 
 func certifyScorecardLess(e1, e2 assembler.CertifyScorecardIngest) bool {
@@ -2831,6 +2854,10 @@ func certifyLegalInputSpecLess(e1, e2 assembler.CertifyLegalIngest) bool {
 }
 
 func licenseInputSpecLess(e1, e2 generated.LicenseInputSpec) bool {
+	return gLess(e1, e2)
+}
+
+func hasMetadataLess(e1, e2 assembler.HasMetadataIngest) bool {
 	return gLess(e1, e2)
 }
 

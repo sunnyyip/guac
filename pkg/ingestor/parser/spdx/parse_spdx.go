@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -32,7 +33,6 @@ import (
 	"github.com/spdx/tools-golang/json"
 	spdx "github.com/spdx/tools-golang/spdx"
 	spdx_common "github.com/spdx/tools-golang/spdx/v2/common"
-	"golang.org/x/exp/slices"
 )
 
 type spdxParser struct {
@@ -243,8 +243,13 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		return preds
 	} else {
 		// adding top level package edge manually for all depends on package
+		timestamp, err := time.Parse(time.RFC3339, s.spdxDoc.CreationInfo.Created)
+		if err != nil {
+			logger.Errorf("SPDX document had invalid created time %q : %w", s.spdxDoc.CreationInfo.Created, err)
+			return nil
+		}
 		for _, topLevelPkg := range topLevel {
-			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc))
+			preds.HasSBOM = append(preds.HasSBOM, common.CreateTopLevelHasSBOM(topLevelPkg, s.doc, s.spdxDoc.DocumentNamespace, timestamp))
 		}
 
 		if s.topLevelIsHeuristic {
@@ -260,7 +265,7 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		if isDependency(rel.Relationship) {
 			foundId = string(rel.RefA.ElementRefID)
 			relatedId = string(rel.RefB.ElementRefID)
-		} else if isDependent(rel.Relationship) {
+		} else if isDependent(rel.Relationship) || isPackageOf(rel.Relationship) {
 			foundId = string(rel.RefB.ElementRefID)
 			relatedId = string(rel.RefA.ElementRefID)
 		} else {
@@ -355,6 +360,31 @@ func (s *spdxParser) GetPredicates(ctx context.Context) *assembler.IngestPredica
 		}
 	}
 
+	for _, pkg := range s.spdxDoc.Packages {
+		pkgInputSpecs := s.getPackageElement(string(pkg.PackageSPDXIdentifier))
+		for _, extRef := range pkg.PackageExternalReferences {
+			if extRef.Category == spdx_common.CategorySecurity {
+				locator := extRef.Locator
+				metadataInputSpec := &model.HasMetadataInputSpec{
+					Key:           "cpe",
+					Value:         locator,
+					Timestamp:     time.Now().UTC(),
+					Justification: "spdx cpe external reference",
+					Origin:        "GUAC SPDX",
+					Collector:     "GUAC",
+				}
+				for i := range pkgInputSpecs {
+					hasMetadata := assembler.HasMetadataIngest{
+						Pkg:          pkgInputSpecs[i],
+						PkgMatchFlag: model.MatchFlags{Pkg: generated.PkgMatchTypeSpecificVersion},
+						HasMetadata:  metadataInputSpec,
+					}
+					preds.HasMetadata = append(preds.HasMetadata, hasMetadata)
+				}
+			}
+		}
+	}
+
 	return preds
 }
 
@@ -393,6 +423,12 @@ func isDependent(rel string) bool {
 	return map[string]bool{
 		spdx_common.TypeRelationshipContainedBy:  true,
 		spdx_common.TypeRelationshipDependencyOf: true,
+	}[rel]
+}
+
+func isPackageOf(rel string) bool {
+	return map[string]bool{
+		spdx_common.TypeRelationshipPackageOf: true,
 	}[rel]
 }
 

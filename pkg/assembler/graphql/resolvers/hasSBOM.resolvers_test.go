@@ -31,6 +31,7 @@ func TestIngestHasSbom(t *testing.T) {
 	type call struct {
 		Sub model.PackageOrArtifactInput
 		HS  *model.HasSBOMInputSpec
+		Inc *model.HasSBOMIncludesInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -48,6 +49,7 @@ func TestIngestHasSbom(t *testing.T) {
 					HS: &model.HasSBOMInputSpec{
 						DownloadLocation: "location one",
 					},
+					Inc: &model.HasSBOMIncludesInputSpec{},
 				},
 			},
 			ExpIngestErr: true,
@@ -60,8 +62,10 @@ func TestIngestHasSbom(t *testing.T) {
 						Package: testdata.P1,
 					},
 					HS: &model.HasSBOMInputSpec{
-						URI: "test uri",
+						URI:        "test uri",
+						KnownSince: ZeroTime,
 					},
+					Inc: &model.HasSBOMIncludesInputSpec{},
 				},
 			},
 			ExpIngestErr: false,
@@ -80,10 +84,10 @@ func TestIngestHasSbom(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestHasSbom(ctx, o.Sub, *o.HS).
+					IngestHasSbom(ctx, o.Sub, *o.HS, *o.Inc).
 					Return(&model.HasSbom{ID: "a"}, nil).
 					Times(times)
-				_, err := r.Mutation().IngestHasSbom(ctx, o.Sub, *o.HS)
+				_, err := r.Mutation().IngestHasSbom(ctx, o.Sub, *o.HS, *o.Inc)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}
@@ -99,6 +103,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 	type call struct {
 		Sub model.PackageOrArtifactInputs
 		HS  []*model.HasSBOMInputSpec
+		Inc []*model.HasSBOMIncludesInputSpec
 	}
 	tests := []struct {
 		Name         string
@@ -106,7 +111,7 @@ func TestIngestHasSBOMs(t *testing.T) {
 		ExpIngestErr bool
 	}{
 		{
-			Name: "Ingest with two packages and one HasSbom",
+			Name: "Ingest with two packages, one HasSbom and one includes",
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -117,12 +122,13 @@ func TestIngestHasSBOMs(t *testing.T) {
 							URI: "test uri",
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{{}},
 				},
 			},
 			ExpIngestErr: true,
 		},
 		{
-			Name: "Ingest with two artifacts and one HasSbom",
+			Name: "Ingest with two artifacts, one HasSbom and one includes",
 			Calls: []call{
 				{
 					Sub: model.PackageOrArtifactInputs{
@@ -133,6 +139,24 @@ func TestIngestHasSBOMs(t *testing.T) {
 							URI: "test uri",
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{{}},
+				},
+			},
+			ExpIngestErr: true,
+		},
+		{
+			Name: "Ingest with one package, one HasSbom and two includes",
+			Calls: []call{
+				{
+					Sub: model.PackageOrArtifactInputs{
+						Packages: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+					},
+					HS: []*model.HasSBOMInputSpec{
+						{
+							URI: "test uri",
+						},
+					},
+					Inc: []*model.HasSBOMIncludesInputSpec{{}, {}},
 				},
 			},
 			ExpIngestErr: true,
@@ -147,9 +171,11 @@ func TestIngestHasSBOMs(t *testing.T) {
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
-							URI: "test uri",
+							URI:        "test uri",
+							KnownSince: ZeroTime,
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{{}},
 				},
 			},
 			ExpIngestErr: true,
@@ -163,9 +189,11 @@ func TestIngestHasSBOMs(t *testing.T) {
 					},
 					HS: []*model.HasSBOMInputSpec{
 						{
-							URI: "test uri",
+							URI:        "test uri",
+							KnownSince: ZeroTime,
 						},
 					},
+					Inc: []*model.HasSBOMIncludesInputSpec{{}},
 				},
 			},
 		},
@@ -183,10 +211,10 @@ func TestIngestHasSBOMs(t *testing.T) {
 				}
 				b.
 					EXPECT().
-					IngestHasSBOMs(ctx, o.Sub, o.HS).
+					IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc).
 					Return([]*model.HasSbom{{ID: "a"}}, nil).
 					Times(times)
-				_, err := r.Mutation().IngestHasSBOMs(ctx, o.Sub, o.HS)
+				_, err := r.Mutation().IngestHasSBOMs(ctx, o.Sub, o.HS, o.Inc)
 				if (err != nil) != test.ExpIngestErr {
 					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
 				}

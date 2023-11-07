@@ -566,7 +566,7 @@ func TestPkgEqual(t *testing.T) {
 			Query: &model.PkgEqualSpec{
 				ID: ptrfrom.String("asdf"),
 			},
-			ExpQueryErr: false,
+			ExpQueryErr: true,
 		},
 	}
 	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
@@ -910,13 +910,7 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			}),
 		}, {
 			// The following are for docker PURLs
-			// TODO (Issue #635): docker PURLs are really weird and potentially not well specified
-			// due to the namespace indicating it may contain registry but the use of
-			// repository_url in the examples. In addition, the versions use in the examples
-			// use tags and potentially indicate truncated hashes.
-
-			//expectedPurlUri: "pkg:docker/customer/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io",
-			expectedPurlUri: "pkg:docker/dockerimage@sha256:244fd47e07d10?repository_url=gcr.io%2Fcustomer",
+			expectedPurlUri: "pkg:docker/dockerimage@sha256%3A244fd47e07d10?repository_url=gcr.io%2Fcustomer",
 			input:           pkg("docker", "gcr.io/customer", "dockerimage", "sha256:244fd47e07d10", "", map[string]string{}),
 		}, {
 			expectedPurlUri: "pkg:docker/debian@dc437cc87d10?repository_url=smartentry",
@@ -929,13 +923,13 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			input:           pkg("gem", "", "ruby-advisory-db-check", "0.12.4", "", map[string]string{}),
 		}, {
 			// TODO (Issue #635): url path escapes here? Will this be an issue when searching via purl in osv or deps.dev?
-			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256:de4d501267da&download_url=https:%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
+			expectedPurlUri: "pkg:generic/openssl@1.1.10g?checksum=sha256%3Ade4d501267da&download_url=https%3A%2F%2Fopenssl.org%2Fsource%2Fopenssl-1.1.0g.tar.gz",
 			input: pkg("generic", "", "openssl", "1.1.10g", "", map[string]string{
 				"download_url": "https://openssl.org/source/openssl-1.1.0g.tar.gz",
 				"checksum":     "sha256:de4d501267da",
 			}),
 		}, {
-			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git+https:%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl@cc55108da32",
+			expectedPurlUri: "pkg:generic/bitwarderl?vcs_url=git%2Bhttps%3A%2F%2Fgit.fsfe.org%2Fdxtr%2Fbitwarderl%40cc55108da32",
 			input: pkg("generic", "", "bitwarderl", "", "", map[string]string{
 				"vcs_url": "git+https://git.fsfe.org/dxtr/bitwarderl@cc55108da32",
 			}),
@@ -949,7 +943,7 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			expectedPurlUri: "pkg:hackage/3d-graphics-examples@0.0.0.2",
 			input:           pkg("hackage", "", "3d-graphics-examples", "0.0.0.2", "", map[string]string{}),
 		}, {
-			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https:%2F%2Fmyrepo.example.com",
+			expectedPurlUri: "pkg:hex/bar@1.2.3?repository_url=https%3A%2F%2Fmyrepo.example.com",
 			input: pkg("hex", "", "bar", "1.2.3", "", map[string]string{
 				"repository_url": "https://myrepo.example.com",
 			}),
@@ -966,7 +960,7 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 				"classifier": "dist",
 			}),
 		}, {
-			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https:%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
+			expectedPurlUri: "pkg:mlflow/trafficsigns@10?model_uuid=36233173b22f4c89b451f1228d700d49&repository_url=https%3A%2F%2Fadb-5245952564735461.0.azuredatabricks.net%2Fapi%2F2.0%2Fmlflow&run_id=410a3121-2709-4f88-98dd-dba0ef056b0a",
 			input: pkg("mlflow", "", "trafficsigns", "10", "", map[string]string{
 				"model_uuid":     "36233173b22f4c89b451f1228d700d49",
 				"run_id":         "410a3121-2709-4f88-98dd-dba0ef056b0a",
@@ -986,21 +980,18 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 			input:           pkg("qpkg", "blackberry", "com.qnx.sdp", "7.0.0.SGA201702151847", "", map[string]string{}),
 		}, {
 			// Special OCI case
-			//TODO (Issue #635): similar issue to above.
-
-			//expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=docker.io/library/debian&arch=amd64&tag=latest",
-			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?arch=amd64&tag=latest&repository_url=docker.io%2Flibrary",
+			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?arch=amd64&repository_url=docker.io%2Flibrary&tag=latest",
 			input: pkg("oci", "docker.io/library", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"arch": "amd64",
 				"tag":  "latest",
 			}),
 		}, {
-			expectedPurlUri: "pkg:oci/debian@sha256:244fd47e07d10?tag=bullseye&repository_url=ghcr.io",
+			expectedPurlUri: "pkg:oci/debian@sha256%3A244fd47e07d10?repository_url=ghcr.io&tag=bullseye",
 			input: pkg("oci", "ghcr.io", "debian", "sha256:244fd47e07d10", "", map[string]string{
 				"tag": "bullseye",
 			}),
 		}, {
-			expectedPurlUri: "pkg:oci/hello-wasm@sha256:244fd47e07d10?tag=v1",
+			expectedPurlUri: "pkg:oci/hello-wasm@sha256%3A244fd47e07d10?tag=v1",
 			input: pkg("oci", "", "hello-wasm", "sha256:244fd47e07d10", "", map[string]string{
 				"tag": "v1",
 			}),
@@ -1033,6 +1024,117 @@ func TestPkgInputSpecToPurl(t *testing.T) {
 				t.Errorf("purl mismatch wanted: %s, got: %s", tt.expectedPurlUri, got)
 				return
 			}
+		})
+	}
+}
+
+func Test_buildPkgEqualByID(t *testing.T) {
+	ctx := context.Background()
+	arangArg := getArangoConfig()
+	err := deleteDatabase(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error deleting arango database: %v", err)
+	}
+	b, err := getBackend(ctx, arangArg)
+	if err != nil {
+		t.Fatalf("error creating arango backend: %v", err)
+	}
+	type call struct {
+		P1 *model.PkgInputSpec
+		P2 *model.PkgInputSpec
+		HE *model.PkgEqualInputSpec
+	}
+	tests := []struct {
+		Name         string
+		InPkg        []*model.PkgInputSpec
+		Calls        []call
+		Query        *model.PkgEqualSpec
+		ExpHE        *model.PkgEqual
+		ExpIngestErr bool
+		ExpQueryErr  bool
+	}{
+		{
+			Name:  "Query on pkg ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P2},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P2,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification two",
+					},
+				},
+			},
+			ExpHE: &model.PkgEqual{
+				Packages:      []*model.Package{testdata.P1out, testdata.P2out},
+				Justification: "test justification two",
+			},
+		},
+		{
+			Name:  "Query on ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			ExpHE: &model.PkgEqual{
+				Packages:      []*model.Package{testdata.P1out, testdata.P3out},
+				Justification: "test justification",
+			},
+		},
+		{
+			Name:  "Query bad ID",
+			InPkg: []*model.PkgInputSpec{testdata.P1, testdata.P3},
+			Calls: []call{
+				{
+					P1: testdata.P1,
+					P2: testdata.P3,
+					HE: &model.PkgEqualInputSpec{
+						Justification: "test justification",
+					},
+				},
+			},
+			Query: &model.PkgEqualSpec{
+				ID: ptrfrom.String("asdf"),
+			},
+			ExpQueryErr: true,
+		},
+	}
+	ignoreID := cmp.FilterPath(func(p cmp.Path) bool {
+		return strings.Compare(".ID", p[len(p)-1].String()) == 0
+	}, cmp.Ignore())
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			for _, a := range test.InPkg {
+				if _, err := b.IngestPackage(ctx, *a); err != nil {
+					t.Fatalf("Could not ingest pkg: %v", err)
+				}
+			}
+			for _, o := range test.Calls {
+				found, err := b.IngestPkgEqual(ctx, *o.P1, *o.P2, *o.HE)
+				if (err != nil) != test.ExpIngestErr {
+					t.Fatalf("did not get expected ingest error, want: %v, got: %v", test.ExpIngestErr, err)
+				}
+				if err != nil {
+					return
+				}
+				got, err := b.(*arangoClient).buildPkgEqualByID(ctx, found.ID, test.Query)
+				if (err != nil) != test.ExpQueryErr {
+					t.Fatalf("did not get expected query error, want: %v, got: %v", test.ExpQueryErr, err)
+				}
+				if err != nil {
+					return
+				}
+				if diff := cmp.Diff(test.ExpHE, got, ignoreID); diff != "" {
+					t.Errorf("Unexpected results. (-want +got):\n%s", diff)
+				}
+			}
+
 		})
 	}
 }

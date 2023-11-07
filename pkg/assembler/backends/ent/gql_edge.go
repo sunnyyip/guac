@@ -236,6 +236,38 @@ func (d *Dependency) DependentPackageVersion(ctx context.Context) (*PackageVersi
 	return result, MaskNotFound(err)
 }
 
+func (hm *HasMetadata) Source(ctx context.Context) (*SourceName, error) {
+	result, err := hm.Edges.SourceOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QuerySource().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (hm *HasMetadata) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := hm.Edges.PackageVersionOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QueryPackageVersion().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (hm *HasMetadata) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := hm.Edges.AllVersionsOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QueryAllVersions().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (hm *HasMetadata) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := hm.Edges.ArtifactOrErr()
+	if IsNotLoaded(err) {
+		result, err = hm.QueryArtifact().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (hsa *HasSourceAt) PackageVersion(ctx context.Context) (*PackageVersion, error) {
 	result, err := hsa.Edges.PackageVersionOrErr()
 	if IsNotLoaded(err) {
@@ -444,6 +476,38 @@ func (pe *PkgEqual) Packages(ctx context.Context) (result []*PackageVersion, err
 	return result, err
 }
 
+func (poc *PointOfContact) Source(ctx context.Context) (*SourceName, error) {
+	result, err := poc.Edges.SourceOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QuerySource().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (poc *PointOfContact) PackageVersion(ctx context.Context) (*PackageVersion, error) {
+	result, err := poc.Edges.PackageVersionOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QueryPackageVersion().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (poc *PointOfContact) AllVersions(ctx context.Context) (*PackageName, error) {
+	result, err := poc.Edges.AllVersionsOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QueryAllVersions().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (poc *PointOfContact) Artifact(ctx context.Context) (*Artifact, error) {
+	result, err := poc.Edges.ArtifactOrErr()
+	if IsNotLoaded(err) {
+		result, err = poc.QueryArtifact().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (sa *SLSAAttestation) BuiltFrom(ctx context.Context) (result []*Artifact, err error) {
 	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
 		result, err = sa.NamedBuiltFrom(graphql.GetFieldContext(ctx).Field.Alias)
@@ -564,6 +628,26 @@ func (vi *VulnerabilityID) VulnEquals(ctx context.Context) (result []*VulnEqual,
 	}
 	if IsNotLoaded(err) {
 		result, err = vi.QueryVulnEquals().All(ctx)
+	}
+	return result, err
+}
+
+func (vi *VulnerabilityID) VulnerabilityMetadata(ctx context.Context) (result []*VulnerabilityMetadata, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = vi.NamedVulnerabilityMetadata(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = vi.Edges.VulnerabilityMetadataOrErr()
+	}
+	if IsNotLoaded(err) {
+		result, err = vi.QueryVulnerabilityMetadata().All(ctx)
+	}
+	return result, err
+}
+
+func (vm *VulnerabilityMetadata) VulnerabilityID(ctx context.Context) (*VulnerabilityID, error) {
+	result, err := vm.Edges.VulnerabilityIDOrErr()
+	if IsNotLoaded(err) {
+		result, err = vm.QueryVulnerabilityID().Only(ctx)
 	}
 	return result, err
 }

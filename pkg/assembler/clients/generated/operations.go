@@ -70,6 +70,7 @@ func (v *AllBuilderTree) GetUri() string { return v.Uri }
 type AllCertifyBad struct {
 	Id            string                                      `json:"id"`
 	Justification string                                      `json:"justification"`
+	KnownSince    time.Time                                   `json:"knownSince"`
 	Subject       AllCertifyBadSubjectPackageSourceOrArtifact `json:"-"`
 	Origin        string                                      `json:"origin"`
 	Collector     string                                      `json:"collector"`
@@ -80,6 +81,9 @@ func (v *AllCertifyBad) GetId() string { return v.Id }
 
 // GetJustification returns AllCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *AllCertifyBad) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns AllCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *AllCertifyBad) GetKnownSince() time.Time { return v.KnownSince }
 
 // GetSubject returns AllCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *AllCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact { return v.Subject }
@@ -128,6 +132,8 @@ type __premarshalAllCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -148,6 +154,7 @@ func (v *AllCertifyBad) __premarshalJSON() (*__premarshalAllCertifyBad, error) {
 
 	retval.Id = v.Id
 	retval.Justification = v.Justification
+	retval.KnownSince = v.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -539,6 +546,7 @@ func (v *AllCertifyBadSubjectSource) __premarshalJSON() (*__premarshalAllCertify
 type AllCertifyGood struct {
 	Id            string                                       `json:"id"`
 	Justification string                                       `json:"justification"`
+	KnownSince    time.Time                                    `json:"knownSince"`
 	Subject       AllCertifyGoodSubjectPackageSourceOrArtifact `json:"-"`
 	Origin        string                                       `json:"origin"`
 	Collector     string                                       `json:"collector"`
@@ -549,6 +557,9 @@ func (v *AllCertifyGood) GetId() string { return v.Id }
 
 // GetJustification returns AllCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *AllCertifyGood) GetJustification() string { return v.Justification }
+
+// GetKnownSince returns AllCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *AllCertifyGood) GetKnownSince() time.Time { return v.KnownSince }
 
 // GetSubject returns AllCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *AllCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact { return v.Subject }
@@ -597,6 +608,8 @@ type __premarshalAllCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -617,6 +630,7 @@ func (v *AllCertifyGood) __premarshalJSON() (*__premarshalAllCertifyGood, error)
 
 	retval.Id = v.Id
 	retval.Justification = v.Justification
+	retval.KnownSince = v.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -3060,6 +3074,14 @@ type AllHasSBOMTree struct {
 	Origin string `json:"origin"`
 	// GUAC collector for the document
 	Collector string `json:"collector"`
+	// Timestamp for SBOM creation
+	KnownSince time.Time `json:"knownSince"`
+	// Included packages and artifacts
+	IncludedSoftware []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact `json:"-"`
+	// Included dependencies
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+	// Included occurrences
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
 }
 
 // GetId returns AllHasSBOMTree.Id, and is useful for accessing the field via an interface.
@@ -3086,6 +3108,24 @@ func (v *AllHasSBOMTree) GetOrigin() string { return v.Origin }
 // GetCollector returns AllHasSBOMTree.Collector, and is useful for accessing the field via an interface.
 func (v *AllHasSBOMTree) GetCollector() string { return v.Collector }
 
+// GetKnownSince returns AllHasSBOMTree.KnownSince, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTree) GetKnownSince() time.Time { return v.KnownSince }
+
+// GetIncludedSoftware returns AllHasSBOMTree.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTree) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.IncludedSoftware
+}
+
+// GetIncludedDependencies returns AllHasSBOMTree.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTree) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns AllHasSBOMTree.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTree) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.IncludedOccurrences
+}
+
 func (v *AllHasSBOMTree) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -3094,7 +3134,8 @@ func (v *AllHasSBOMTree) UnmarshalJSON(b []byte) error {
 
 	var firstPass struct {
 		*AllHasSBOMTree
-		Subject json.RawMessage `json:"subject"`
+		Subject          json.RawMessage   `json:"subject"`
+		IncludedSoftware []json.RawMessage `json:"includedSoftware"`
 		graphql.NoUnmarshalJSON
 	}
 	firstPass.AllHasSBOMTree = v
@@ -3113,6 +3154,25 @@ func (v *AllHasSBOMTree) UnmarshalJSON(b []byte) error {
 			if err != nil {
 				return fmt.Errorf(
 					"unable to unmarshal AllHasSBOMTree.Subject: %w", err)
+			}
+		}
+	}
+
+	{
+		dst := &v.IncludedSoftware
+		src := firstPass.IncludedSoftware
+		*dst = make(
+			[]AllHasSBOMTreeIncludedSoftwarePackageOrArtifact,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			if len(src) != 0 && string(src) != "null" {
+				err = __unmarshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+					src, dst)
+				if err != nil {
+					return fmt.Errorf(
+						"unable to unmarshal AllHasSBOMTree.IncludedSoftware: %w", err)
+				}
 			}
 		}
 	}
@@ -3135,6 +3195,14 @@ type __premarshalAllHasSBOMTree struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
 }
 
 func (v *AllHasSBOMTree) MarshalJSON() ([]byte, error) {
@@ -3167,7 +3235,506 @@ func (v *AllHasSBOMTree) __premarshalJSON() (*__premarshalAllHasSBOMTree, error)
 	retval.DownloadLocation = v.DownloadLocation
 	retval.Origin = v.Origin
 	retval.Collector = v.Collector
+	retval.KnownSince = v.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.IncludedDependencies
+	retval.IncludedOccurrences = v.IncludedOccurrences
 	return &retval, nil
+}
+
+// AllHasSBOMTreeIncludedDependenciesIsDependency includes the requested fields of the GraphQL type IsDependency.
+// The GraphQL type's documentation follows.
+//
+// IsDependency is an attestation to record that a package depends on another.
+type AllHasSBOMTreeIncludedDependenciesIsDependency struct {
+	AllIsDependencyTree `json:"-"`
+}
+
+// GetId returns AllHasSBOMTreeIncludedDependenciesIsDependency.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetId() string {
+	return v.AllIsDependencyTree.Id
+}
+
+// GetJustification returns AllHasSBOMTreeIncludedDependenciesIsDependency.Justification, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetJustification() string {
+	return v.AllIsDependencyTree.Justification
+}
+
+// GetPackage returns AllHasSBOMTreeIncludedDependenciesIsDependency.Package, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetPackage() AllIsDependencyTreePackage {
+	return v.AllIsDependencyTree.Package
+}
+
+// GetDependencyPackage returns AllHasSBOMTreeIncludedDependenciesIsDependency.DependencyPackage, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetDependencyPackage() AllIsDependencyTreeDependencyPackage {
+	return v.AllIsDependencyTree.DependencyPackage
+}
+
+// GetDependencyType returns AllHasSBOMTreeIncludedDependenciesIsDependency.DependencyType, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetDependencyType() DependencyType {
+	return v.AllIsDependencyTree.DependencyType
+}
+
+// GetVersionRange returns AllHasSBOMTreeIncludedDependenciesIsDependency.VersionRange, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetVersionRange() string {
+	return v.AllIsDependencyTree.VersionRange
+}
+
+// GetOrigin returns AllHasSBOMTreeIncludedDependenciesIsDependency.Origin, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetOrigin() string {
+	return v.AllIsDependencyTree.Origin
+}
+
+// GetCollector returns AllHasSBOMTreeIncludedDependenciesIsDependency.Collector, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) GetCollector() string {
+	return v.AllIsDependencyTree.Collector
+}
+
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSBOMTreeIncludedDependenciesIsDependency
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSBOMTreeIncludedDependenciesIsDependency = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsDependencyTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSBOMTreeIncludedDependenciesIsDependency struct {
+	Id string `json:"id"`
+
+	Justification string `json:"justification"`
+
+	Package AllIsDependencyTreePackage `json:"package"`
+
+	DependencyPackage AllIsDependencyTreeDependencyPackage `json:"dependencyPackage"`
+
+	DependencyType DependencyType `json:"dependencyType"`
+
+	VersionRange string `json:"versionRange"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSBOMTreeIncludedDependenciesIsDependency) __premarshalJSON() (*__premarshalAllHasSBOMTreeIncludedDependenciesIsDependency, error) {
+	var retval __premarshalAllHasSBOMTreeIncludedDependenciesIsDependency
+
+	retval.Id = v.AllIsDependencyTree.Id
+	retval.Justification = v.AllIsDependencyTree.Justification
+	retval.Package = v.AllIsDependencyTree.Package
+	retval.DependencyPackage = v.AllIsDependencyTree.DependencyPackage
+	retval.DependencyType = v.AllIsDependencyTree.DependencyType
+	retval.VersionRange = v.AllIsDependencyTree.VersionRange
+	retval.Origin = v.AllIsDependencyTree.Origin
+	retval.Collector = v.AllIsDependencyTree.Collector
+	return &retval, nil
+}
+
+// AllHasSBOMTreeIncludedOccurrencesIsOccurrence includes the requested fields of the GraphQL type IsOccurrence.
+// The GraphQL type's documentation follows.
+//
+// IsOccurrence is an attestation to link an artifact to a package or source.
+//
+// Attestation must occur at the PackageVersion or at the SourceName.
+type AllHasSBOMTreeIncludedOccurrencesIsOccurrence struct {
+	AllIsOccurrencesTree `json:"-"`
+}
+
+// GetId returns AllHasSBOMTreeIncludedOccurrencesIsOccurrence.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) GetId() string {
+	return v.AllIsOccurrencesTree.Id
+}
+
+// GetSubject returns AllHasSBOMTreeIncludedOccurrencesIsOccurrence.Subject, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) GetSubject() AllIsOccurrencesTreeSubjectPackageOrSource {
+	return v.AllIsOccurrencesTree.Subject
+}
+
+// GetArtifact returns AllHasSBOMTreeIncludedOccurrencesIsOccurrence.Artifact, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) GetArtifact() AllIsOccurrencesTreeArtifact {
+	return v.AllIsOccurrencesTree.Artifact
+}
+
+// GetJustification returns AllHasSBOMTreeIncludedOccurrencesIsOccurrence.Justification, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) GetJustification() string {
+	return v.AllIsOccurrencesTree.Justification
+}
+
+// GetOrigin returns AllHasSBOMTreeIncludedOccurrencesIsOccurrence.Origin, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) GetOrigin() string {
+	return v.AllIsOccurrencesTree.Origin
+}
+
+// GetCollector returns AllHasSBOMTreeIncludedOccurrencesIsOccurrence.Collector, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) GetCollector() string {
+	return v.AllIsOccurrencesTree.Collector
+}
+
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSBOMTreeIncludedOccurrencesIsOccurrence
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSBOMTreeIncludedOccurrencesIsOccurrence = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllIsOccurrencesTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSBOMTreeIncludedOccurrencesIsOccurrence struct {
+	Id string `json:"id"`
+
+	Subject json.RawMessage `json:"subject"`
+
+	Artifact AllIsOccurrencesTreeArtifact `json:"artifact"`
+
+	Justification string `json:"justification"`
+
+	Origin string `json:"origin"`
+
+	Collector string `json:"collector"`
+}
+
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSBOMTreeIncludedOccurrencesIsOccurrence) __premarshalJSON() (*__premarshalAllHasSBOMTreeIncludedOccurrencesIsOccurrence, error) {
+	var retval __premarshalAllHasSBOMTreeIncludedOccurrencesIsOccurrence
+
+	retval.Id = v.AllIsOccurrencesTree.Id
+	{
+
+		dst := &retval.Subject
+		src := v.AllIsOccurrencesTree.Subject
+		var err error
+		*dst, err = __marshalAllIsOccurrencesTreeSubjectPackageOrSource(
+			&src)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"unable to marshal AllHasSBOMTreeIncludedOccurrencesIsOccurrence.AllIsOccurrencesTree.Subject: %w", err)
+		}
+	}
+	retval.Artifact = v.AllIsOccurrencesTree.Artifact
+	retval.Justification = v.AllIsOccurrencesTree.Justification
+	retval.Origin = v.AllIsOccurrencesTree.Origin
+	retval.Collector = v.AllIsOccurrencesTree.Collector
+	return &retval, nil
+}
+
+// AllHasSBOMTreeIncludedSoftwareArtifact includes the requested fields of the GraphQL type Artifact.
+// The GraphQL type's documentation follows.
+//
+// Artifact represents an artifact identified by a checksum hash.
+//
+// The checksum is split into the digest value and the algorithm used to generate
+// it. Both fields are mandatory and canonicalized to be lowercase.
+//
+// If having a checksum Go object, algorithm can be
+// strings.ToLower(string(checksum.Algorithm)) and digest can be checksum.Value.
+type AllHasSBOMTreeIncludedSoftwareArtifact struct {
+	Typename        *string `json:"__typename"`
+	AllArtifactTree `json:"-"`
+}
+
+// GetTypename returns AllHasSBOMTreeIncludedSoftwareArtifact.Typename, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) GetTypename() *string { return v.Typename }
+
+// GetId returns AllHasSBOMTreeIncludedSoftwareArtifact.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) GetId() string { return v.AllArtifactTree.Id }
+
+// GetAlgorithm returns AllHasSBOMTreeIncludedSoftwareArtifact.Algorithm, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) GetAlgorithm() string {
+	return v.AllArtifactTree.Algorithm
+}
+
+// GetDigest returns AllHasSBOMTreeIncludedSoftwareArtifact.Digest, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) GetDigest() string { return v.AllArtifactTree.Digest }
+
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSBOMTreeIncludedSoftwareArtifact
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSBOMTreeIncludedSoftwareArtifact = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllArtifactTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSBOMTreeIncludedSoftwareArtifact struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Algorithm string `json:"algorithm"`
+
+	Digest string `json:"digest"`
+}
+
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) __premarshalJSON() (*__premarshalAllHasSBOMTreeIncludedSoftwareArtifact, error) {
+	var retval __premarshalAllHasSBOMTreeIncludedSoftwareArtifact
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllArtifactTree.Id
+	retval.Algorithm = v.AllArtifactTree.Algorithm
+	retval.Digest = v.AllArtifactTree.Digest
+	return &retval, nil
+}
+
+// AllHasSBOMTreeIncludedSoftwarePackage includes the requested fields of the GraphQL type Package.
+// The GraphQL type's documentation follows.
+//
+// Package represents the root of the package trie/tree.
+//
+// We map package information to a trie, closely matching the pURL specification
+// (https://github.com/package-url/purl-spec/blob/0dd92f26f8bb11956ffdf5e8acfcee71e8560407/README.rst),
+// but deviating from it where GUAC heuristics allow for better representation of
+// package information. Each path in the trie fully represents a package; we split
+// the trie based on the pURL components.
+//
+// This node matches a pkg:<type> partial pURL. The type field matches the
+// pURL types but we might also use "guac" for the cases where the pURL
+// representation is not complete or when we have custom rules.
+//
+// Since this node is at the root of the package trie, it is named Package, not
+// PackageType.
+type AllHasSBOMTreeIncludedSoftwarePackage struct {
+	Typename   *string `json:"__typename"`
+	AllPkgTree `json:"-"`
+}
+
+// GetTypename returns AllHasSBOMTreeIncludedSoftwarePackage.Typename, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) GetTypename() *string { return v.Typename }
+
+// GetId returns AllHasSBOMTreeIncludedSoftwarePackage.Id, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) GetId() string { return v.AllPkgTree.Id }
+
+// GetType returns AllHasSBOMTreeIncludedSoftwarePackage.Type, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) GetType() string { return v.AllPkgTree.Type }
+
+// GetNamespaces returns AllHasSBOMTreeIncludedSoftwarePackage.Namespaces, and is useful for accessing the field via an interface.
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) GetNamespaces() []AllPkgTreeNamespacesPackageNamespace {
+	return v.AllPkgTree.Namespaces
+}
+
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*AllHasSBOMTreeIncludedSoftwarePackage
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.AllHasSBOMTreeIncludedSoftwarePackage = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AllPkgTree)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalAllHasSBOMTreeIncludedSoftwarePackage struct {
+	Typename *string `json:"__typename"`
+
+	Id string `json:"id"`
+
+	Type string `json:"type"`
+
+	Namespaces []AllPkgTreeNamespacesPackageNamespace `json:"namespaces"`
+}
+
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) __premarshalJSON() (*__premarshalAllHasSBOMTreeIncludedSoftwarePackage, error) {
+	var retval __premarshalAllHasSBOMTreeIncludedSoftwarePackage
+
+	retval.Typename = v.Typename
+	retval.Id = v.AllPkgTree.Id
+	retval.Type = v.AllPkgTree.Type
+	retval.Namespaces = v.AllPkgTree.Namespaces
+	return &retval, nil
+}
+
+// AllHasSBOMTreeIncludedSoftwarePackageOrArtifact includes the requested fields of the GraphQL interface PackageOrArtifact.
+//
+// AllHasSBOMTreeIncludedSoftwarePackageOrArtifact is implemented by the following types:
+// AllHasSBOMTreeIncludedSoftwareArtifact
+// AllHasSBOMTreeIncludedSoftwarePackage
+// The GraphQL type's documentation follows.
+//
+// PackageOrArtifact is a union of Package and Artifact.
+type AllHasSBOMTreeIncludedSoftwarePackageOrArtifact interface {
+	implementsGraphQLInterfaceAllHasSBOMTreeIncludedSoftwarePackageOrArtifact()
+	// GetTypename returns the receiver's concrete GraphQL type-name (see interface doc for possible values).
+	GetTypename() *string
+}
+
+func (v *AllHasSBOMTreeIncludedSoftwareArtifact) implementsGraphQLInterfaceAllHasSBOMTreeIncludedSoftwarePackageOrArtifact() {
+}
+func (v *AllHasSBOMTreeIncludedSoftwarePackage) implementsGraphQLInterfaceAllHasSBOMTreeIncludedSoftwarePackageOrArtifact() {
+}
+
+func __unmarshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(b []byte, v *AllHasSBOMTreeIncludedSoftwarePackageOrArtifact) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var tn struct {
+		TypeName string `json:"__typename"`
+	}
+	err := json.Unmarshal(b, &tn)
+	if err != nil {
+		return err
+	}
+
+	switch tn.TypeName {
+	case "Artifact":
+		*v = new(AllHasSBOMTreeIncludedSoftwareArtifact)
+		return json.Unmarshal(b, *v)
+	case "Package":
+		*v = new(AllHasSBOMTreeIncludedSoftwarePackage)
+		return json.Unmarshal(b, *v)
+	case "":
+		return fmt.Errorf(
+			"response was missing PackageOrArtifact.__typename")
+	default:
+		return fmt.Errorf(
+			`unexpected concrete type for AllHasSBOMTreeIncludedSoftwarePackageOrArtifact: "%v"`, tn.TypeName)
+	}
+}
+
+func __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(v *AllHasSBOMTreeIncludedSoftwarePackageOrArtifact) ([]byte, error) {
+
+	var typename string
+	switch v := (*v).(type) {
+	case *AllHasSBOMTreeIncludedSoftwareArtifact:
+		typename = "Artifact"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllHasSBOMTreeIncludedSoftwareArtifact
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case *AllHasSBOMTreeIncludedSoftwarePackage:
+		typename = "Package"
+
+		premarshaled, err := v.__premarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		result := struct {
+			TypeName string `json:"__typename"`
+			*__premarshalAllHasSBOMTreeIncludedSoftwarePackage
+		}{typename, premarshaled}
+		return json.Marshal(result)
+	case nil:
+		return []byte("null"), nil
+	default:
+		return nil, fmt.Errorf(
+			`unexpected concrete type for AllHasSBOMTreeIncludedSoftwarePackageOrArtifact: "%T"`, v)
+	}
 }
 
 // AllHasSBOMTreeSubjectArtifact includes the requested fields of the GraphQL type Artifact.
@@ -6060,9 +6627,10 @@ func (v *CertifyBadArtifactsResponse) GetIngestCertifyBads() []string { return v
 // CertifyBadInputSpec represents the mutation input to ingest a CertifyBad
 // evidence.
 type CertifyBadInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // GetJustification returns CertifyBadInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6073,6 +6641,9 @@ func (v *CertifyBadInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns CertifyBadInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns CertifyBadInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // CertifyBadPkgResponse is returned by CertifyBadPkg on success.
 type CertifyBadPkgResponse struct {
@@ -6101,12 +6672,16 @@ func (v *CertifyBadPkgsResponse) GetIngestCertifyBads() []string { return v.Inge
 //
 // If a source is specified in the subject filter, then it must specify a name,
 // and optionally a tag and a commit.
+//
+// If KnownSince is specified, the returned value will be after or equal to the specified time.
+// Any nodes time that is before KnownSince is excluded.
 type CertifyBadSpec struct {
 	Id            *string                      `json:"id"`
 	Subject       *PackageSourceOrArtifactSpec `json:"subject"`
 	Justification *string                      `json:"justification"`
 	Origin        *string                      `json:"origin"`
 	Collector     *string                      `json:"collector"`
+	KnownSince    *time.Time                   `json:"knownSince"`
 }
 
 // GetId returns CertifyBadSpec.Id, and is useful for accessing the field via an interface.
@@ -6123,6 +6698,9 @@ func (v *CertifyBadSpec) GetOrigin() *string { return v.Origin }
 
 // GetCollector returns CertifyBadSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyBadSpec) GetCollector() *string { return v.Collector }
+
+// GetKnownSince returns CertifyBadSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadSpec) GetKnownSince() *time.Time { return v.KnownSince }
 
 // CertifyBadSrcResponse is returned by CertifyBadSrc on success.
 type CertifyBadSrcResponse struct {
@@ -6166,6 +6744,9 @@ func (v *CertifyBadsCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns CertifyBadsCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *CertifyBadsCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns CertifyBadsCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyBadsCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns CertifyBadsCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *CertifyBadsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -6207,6 +6788,8 @@ type __premarshalCertifyBadsCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -6227,6 +6810,7 @@ func (v *CertifyBadsCertifyBad) __premarshalJSON() (*__premarshalCertifyBadsCert
 
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -6273,9 +6857,10 @@ func (v *CertifyGoodArtifactsResponse) GetIngestCertifyGoods() []string { return
 
 // CertifyGoodInputSpec represents the mutation input to ingest a CertifyGood evidence.
 type CertifyGoodInputSpec struct {
-	Justification string `json:"justification"`
-	Origin        string `json:"origin"`
-	Collector     string `json:"collector"`
+	Justification string    `json:"justification"`
+	Origin        string    `json:"origin"`
+	Collector     string    `json:"collector"`
+	KnownSince    time.Time `json:"knownSince"`
 }
 
 // GetJustification returns CertifyGoodInputSpec.Justification, and is useful for accessing the field via an interface.
@@ -6286,6 +6871,9 @@ func (v *CertifyGoodInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns CertifyGoodInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *CertifyGoodInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns CertifyGoodInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *CertifyGoodInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // CertifyGoodPkgResponse is returned by CertifyGoodPkg on success.
 type CertifyGoodPkgResponse struct {
@@ -6724,8 +7312,14 @@ const (
 	EdgePackageHasSourceAt               Edge = "PACKAGE_HAS_SOURCE_AT"
 	EdgePackageIsDependency              Edge = "PACKAGE_IS_DEPENDENCY"
 	EdgePackageIsOccurrence              Edge = "PACKAGE_IS_OCCURRENCE"
+	EdgePackageNamePackageNamespace      Edge = "PACKAGE_NAME_PACKAGE_NAMESPACE"
+	EdgePackageNamePackageVersion        Edge = "PACKAGE_NAME_PACKAGE_VERSION"
+	EdgePackageNamespacePackageName      Edge = "PACKAGE_NAMESPACE_PACKAGE_NAME"
+	EdgePackageNamespacePackageType      Edge = "PACKAGE_NAMESPACE_PACKAGE_TYPE"
 	EdgePackagePkgEqual                  Edge = "PACKAGE_PKG_EQUAL"
 	EdgePackagePointOfContact            Edge = "PACKAGE_POINT_OF_CONTACT"
+	EdgePackageTypePackageNamespace      Edge = "PACKAGE_TYPE_PACKAGE_NAMESPACE"
+	EdgePackageVersionPackageName        Edge = "PACKAGE_VERSION_PACKAGE_NAME"
 	EdgeSourceCertifyBad                 Edge = "SOURCE_CERTIFY_BAD"
 	EdgeSourceCertifyGood                Edge = "SOURCE_CERTIFY_GOOD"
 	EdgeSourceCertifyLegal               Edge = "SOURCE_CERTIFY_LEGAL"
@@ -6733,9 +7327,15 @@ const (
 	EdgeSourceHasMetadata                Edge = "SOURCE_HAS_METADATA"
 	EdgeSourceHasSourceAt                Edge = "SOURCE_HAS_SOURCE_AT"
 	EdgeSourceIsOccurrence               Edge = "SOURCE_IS_OCCURRENCE"
+	EdgeSourceNameSourceNamespace        Edge = "SOURCE_NAME_SOURCE_NAMESPACE"
+	EdgeSourceNamespaceSourceName        Edge = "SOURCE_NAMESPACE_SOURCE_NAME"
+	EdgeSourceNamespaceSourceType        Edge = "SOURCE_NAMESPACE_SOURCE_TYPE"
 	EdgeSourcePointOfContact             Edge = "SOURCE_POINT_OF_CONTACT"
+	EdgeSourceTypeSourceNamespace        Edge = "SOURCE_TYPE_SOURCE_NAMESPACE"
 	EdgeVulnerabilityCertifyVexStatement Edge = "VULNERABILITY_CERTIFY_VEX_STATEMENT"
 	EdgeVulnerabilityCertifyVuln         Edge = "VULNERABILITY_CERTIFY_VULN"
+	EdgeVulnerabilityIdVulnerabilityType Edge = "VULNERABILITY_ID_VULNERABILITY_TYPE"
+	EdgeVulnerabilityTypeVulnerabilityId Edge = "VULNERABILITY_TYPE_VULNERABILITY_ID"
 	EdgeVulnerabilityVulnEqual           Edge = "VULNERABILITY_VULN_EQUAL"
 	EdgeVulnerabilityVulnMetadata        Edge = "VULNERABILITY_VULN_METADATA"
 	EdgeCertifyBadArtifact               Edge = "CERTIFY_BAD_ARTIFACT"
@@ -6759,6 +7359,9 @@ const (
 	EdgeHasMetadataSource                Edge = "HAS_METADATA_SOURCE"
 	EdgeHasSbomArtifact                  Edge = "HAS_SBOM_ARTIFACT"
 	EdgeHasSbomPackage                   Edge = "HAS_SBOM_PACKAGE"
+	EdgeHasSbomIncludedSoftware          Edge = "HAS_SBOM_INCLUDED_SOFTWARE"
+	EdgeHasSbomIncludedDependencies      Edge = "HAS_SBOM_INCLUDED_DEPENDENCIES"
+	EdgeHasSbomIncludedOccurrences       Edge = "HAS_SBOM_INCLUDED_OCCURRENCES"
 	EdgeHasSlsaBuiltBy                   Edge = "HAS_SLSA_BUILT_BY"
 	EdgeHasSlsaMaterials                 Edge = "HAS_SLSA_MATERIALS"
 	EdgeHasSlsaSubject                   Edge = "HAS_SLSA_SUBJECT"
@@ -7337,14 +7940,30 @@ type HasSBOMArtifactsResponse struct {
 // GetIngestHasSBOMs returns HasSBOMArtifactsResponse.IngestHasSBOMs, and is useful for accessing the field via an interface.
 func (v *HasSBOMArtifactsResponse) GetIngestHasSBOMs() []string { return v.IngestHasSBOMs }
 
-// HasSBOMInputSpec is the same as HasSBOM but for mutation input.
+type HasSBOMIncludesInputSpec struct {
+	Software     []string `json:"software"`
+	Dependencies []string `json:"dependencies"`
+	Occurrences  []string `json:"occurrences"`
+}
+
+// GetSoftware returns HasSBOMIncludesInputSpec.Software, and is useful for accessing the field via an interface.
+func (v *HasSBOMIncludesInputSpec) GetSoftware() []string { return v.Software }
+
+// GetDependencies returns HasSBOMIncludesInputSpec.Dependencies, and is useful for accessing the field via an interface.
+func (v *HasSBOMIncludesInputSpec) GetDependencies() []string { return v.Dependencies }
+
+// GetOccurrences returns HasSBOMIncludesInputSpec.Occurrences, and is useful for accessing the field via an interface.
+func (v *HasSBOMIncludesInputSpec) GetOccurrences() []string { return v.Occurrences }
+
+// HasSBOMInputSpec is similar to HasSBOM but for mutation input.
 type HasSBOMInputSpec struct {
-	Uri              string `json:"uri"`
-	Algorithm        string `json:"algorithm"`
-	Digest           string `json:"digest"`
-	DownloadLocation string `json:"downloadLocation"`
-	Origin           string `json:"origin"`
-	Collector        string `json:"collector"`
+	Uri              string    `json:"uri"`
+	Algorithm        string    `json:"algorithm"`
+	Digest           string    `json:"digest"`
+	DownloadLocation string    `json:"downloadLocation"`
+	Origin           string    `json:"origin"`
+	Collector        string    `json:"collector"`
+	KnownSince       time.Time `json:"knownSince"`
 }
 
 // GetUri returns HasSBOMInputSpec.Uri, and is useful for accessing the field via an interface.
@@ -7364,6 +7983,9 @@ func (v *HasSBOMInputSpec) GetOrigin() string { return v.Origin }
 
 // GetCollector returns HasSBOMInputSpec.Collector, and is useful for accessing the field via an interface.
 func (v *HasSBOMInputSpec) GetCollector() string { return v.Collector }
+
+// GetKnownSince returns HasSBOMInputSpec.KnownSince, and is useful for accessing the field via an interface.
+func (v *HasSBOMInputSpec) GetKnownSince() time.Time { return v.KnownSince }
 
 // HasSBOMPkgResponse is returned by HasSBOMPkg on success.
 type HasSBOMPkgResponse struct {
@@ -7509,23 +8131,81 @@ type IngestLicensesResponse struct {
 // GetIngestLicenses returns IngestLicensesResponse.IngestLicenses, and is useful for accessing the field via an interface.
 func (v *IngestLicensesResponse) GetIngestLicenses() []string { return v.IngestLicenses }
 
+// IngestPackageIngestPackagePackageIDs includes the requested fields of the GraphQL type PackageIDs.
+// The GraphQL type's documentation follows.
+//
+// The IDs of the ingested package
+type IngestPackageIngestPackagePackageIDs struct {
+	PackageTypeID      string `json:"packageTypeID"`
+	PackageNamespaceID string `json:"packageNamespaceID"`
+	PackageNameID      string `json:"packageNameID"`
+	PackageVersionID   string `json:"packageVersionID"`
+}
+
+// GetPackageTypeID returns IngestPackageIngestPackagePackageIDs.PackageTypeID, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackagePackageIDs) GetPackageTypeID() string { return v.PackageTypeID }
+
+// GetPackageNamespaceID returns IngestPackageIngestPackagePackageIDs.PackageNamespaceID, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackagePackageIDs) GetPackageNamespaceID() string {
+	return v.PackageNamespaceID
+}
+
+// GetPackageNameID returns IngestPackageIngestPackagePackageIDs.PackageNameID, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackagePackageIDs) GetPackageNameID() string { return v.PackageNameID }
+
+// GetPackageVersionID returns IngestPackageIngestPackagePackageIDs.PackageVersionID, and is useful for accessing the field via an interface.
+func (v *IngestPackageIngestPackagePackageIDs) GetPackageVersionID() string {
+	return v.PackageVersionID
+}
+
 // IngestPackageResponse is returned by IngestPackage on success.
 type IngestPackageResponse struct {
-	// Ingests a new package and returns the corresponding package trie path. The returned ID can be empty string.
-	IngestPackage string `json:"ingestPackage"`
+	// Ingests a new package and returns a corresponding package hierarchy containing only the IDs. The returned ID can be empty string.
+	IngestPackage IngestPackageIngestPackagePackageIDs `json:"ingestPackage"`
 }
 
 // GetIngestPackage returns IngestPackageResponse.IngestPackage, and is useful for accessing the field via an interface.
-func (v *IngestPackageResponse) GetIngestPackage() string { return v.IngestPackage }
+func (v *IngestPackageResponse) GetIngestPackage() IngestPackageIngestPackagePackageIDs {
+	return v.IngestPackage
+}
+
+// IngestPackagesIngestPackagesPackageIDs includes the requested fields of the GraphQL type PackageIDs.
+// The GraphQL type's documentation follows.
+//
+// The IDs of the ingested package
+type IngestPackagesIngestPackagesPackageIDs struct {
+	PackageTypeID      string `json:"packageTypeID"`
+	PackageNamespaceID string `json:"packageNamespaceID"`
+	PackageNameID      string `json:"packageNameID"`
+	PackageVersionID   string `json:"packageVersionID"`
+}
+
+// GetPackageTypeID returns IngestPackagesIngestPackagesPackageIDs.PackageTypeID, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackageIDs) GetPackageTypeID() string { return v.PackageTypeID }
+
+// GetPackageNamespaceID returns IngestPackagesIngestPackagesPackageIDs.PackageNamespaceID, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackageIDs) GetPackageNamespaceID() string {
+	return v.PackageNamespaceID
+}
+
+// GetPackageNameID returns IngestPackagesIngestPackagesPackageIDs.PackageNameID, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackageIDs) GetPackageNameID() string { return v.PackageNameID }
+
+// GetPackageVersionID returns IngestPackagesIngestPackagesPackageIDs.PackageVersionID, and is useful for accessing the field via an interface.
+func (v *IngestPackagesIngestPackagesPackageIDs) GetPackageVersionID() string {
+	return v.PackageVersionID
+}
 
 // IngestPackagesResponse is returned by IngestPackages on success.
 type IngestPackagesResponse struct {
-	// Bulk ingests packages and returns the list of corresponding package trie path. The returned array of IDs can be a an array of empty string.
-	IngestPackages []string `json:"ingestPackages"`
+	// Bulk ingests packages and returns the list of corresponding package hierarchies containing only the IDs. The returned array of IDs can be empty strings.
+	IngestPackages []IngestPackagesIngestPackagesPackageIDs `json:"ingestPackages"`
 }
 
 // GetIngestPackages returns IngestPackagesResponse.IngestPackages, and is useful for accessing the field via an interface.
-func (v *IngestPackagesResponse) GetIngestPackages() []string { return v.IngestPackages }
+func (v *IngestPackagesResponse) GetIngestPackages() []IngestPackagesIngestPackagesPackageIDs {
+	return v.IngestPackages
+}
 
 // IngestPkgEqualResponse is returned by IngestPkgEqual on success.
 type IngestPkgEqualResponse struct {
@@ -7545,23 +8225,67 @@ type IngestPkgEqualsResponse struct {
 // GetIngestPkgEquals returns IngestPkgEqualsResponse.IngestPkgEquals, and is useful for accessing the field via an interface.
 func (v *IngestPkgEqualsResponse) GetIngestPkgEquals() []string { return v.IngestPkgEquals }
 
+// IngestSourceIngestSourceSourceIDs includes the requested fields of the GraphQL type SourceIDs.
+// The GraphQL type's documentation follows.
+//
+// The IDs of the ingested pacsourcekage
+type IngestSourceIngestSourceSourceIDs struct {
+	SourceTypeID      string `json:"sourceTypeID"`
+	SourceNamespaceID string `json:"sourceNamespaceID"`
+	SourceNameID      string `json:"sourceNameID"`
+}
+
+// GetSourceTypeID returns IngestSourceIngestSourceSourceIDs.SourceTypeID, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSourceSourceIDs) GetSourceTypeID() string { return v.SourceTypeID }
+
+// GetSourceNamespaceID returns IngestSourceIngestSourceSourceIDs.SourceNamespaceID, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSourceSourceIDs) GetSourceNamespaceID() string { return v.SourceNamespaceID }
+
+// GetSourceNameID returns IngestSourceIngestSourceSourceIDs.SourceNameID, and is useful for accessing the field via an interface.
+func (v *IngestSourceIngestSourceSourceIDs) GetSourceNameID() string { return v.SourceNameID }
+
 // IngestSourceResponse is returned by IngestSource on success.
 type IngestSourceResponse struct {
 	// Ingests a new source and returns the corresponding source trie path. The returned ID can be empty string.
-	IngestSource string `json:"ingestSource"`
+	IngestSource IngestSourceIngestSourceSourceIDs `json:"ingestSource"`
 }
 
 // GetIngestSource returns IngestSourceResponse.IngestSource, and is useful for accessing the field via an interface.
-func (v *IngestSourceResponse) GetIngestSource() string { return v.IngestSource }
+func (v *IngestSourceResponse) GetIngestSource() IngestSourceIngestSourceSourceIDs {
+	return v.IngestSource
+}
+
+// IngestSourcesIngestSourcesSourceIDs includes the requested fields of the GraphQL type SourceIDs.
+// The GraphQL type's documentation follows.
+//
+// The IDs of the ingested pacsourcekage
+type IngestSourcesIngestSourcesSourceIDs struct {
+	SourceTypeID      string `json:"sourceTypeID"`
+	SourceNamespaceID string `json:"sourceNamespaceID"`
+	SourceNameID      string `json:"sourceNameID"`
+}
+
+// GetSourceTypeID returns IngestSourcesIngestSourcesSourceIDs.SourceTypeID, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSourceIDs) GetSourceTypeID() string { return v.SourceTypeID }
+
+// GetSourceNamespaceID returns IngestSourcesIngestSourcesSourceIDs.SourceNamespaceID, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSourceIDs) GetSourceNamespaceID() string {
+	return v.SourceNamespaceID
+}
+
+// GetSourceNameID returns IngestSourcesIngestSourcesSourceIDs.SourceNameID, and is useful for accessing the field via an interface.
+func (v *IngestSourcesIngestSourcesSourceIDs) GetSourceNameID() string { return v.SourceNameID }
 
 // IngestSourcesResponse is returned by IngestSources on success.
 type IngestSourcesResponse struct {
 	// Bulk ingests sources and returns the list of corresponding source trie path. The returned array of IDs can be a an array of empty string.
-	IngestSources []string `json:"ingestSources"`
+	IngestSources []IngestSourcesIngestSourcesSourceIDs `json:"ingestSources"`
 }
 
 // GetIngestSources returns IngestSourcesResponse.IngestSources, and is useful for accessing the field via an interface.
-func (v *IngestSourcesResponse) GetIngestSources() []string { return v.IngestSources }
+func (v *IngestSourcesResponse) GetIngestSources() []IngestSourcesIngestSourcesSourceIDs {
+	return v.IngestSources
+}
 
 // IngestVulnEqualResponse is returned by IngestVulnEqual on success.
 type IngestVulnEqualResponse struct {
@@ -8027,6 +8751,9 @@ func (v *NeighborsNeighborsCertifyBad) GetJustification() string {
 	return v.AllCertifyBad.Justification
 }
 
+// GetKnownSince returns NeighborsNeighborsCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns NeighborsNeighborsCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -8070,6 +8797,8 @@ type __premarshalNeighborsNeighborsCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -8091,6 +8820,7 @@ func (v *NeighborsNeighborsCertifyBad) __premarshalJSON() (*__premarshalNeighbor
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -8138,6 +8868,9 @@ func (v *NeighborsNeighborsCertifyGood) GetJustification() string {
 	return v.AllCertifyGood.Justification
 }
 
+// GetKnownSince returns NeighborsNeighborsCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns NeighborsNeighborsCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -8181,6 +8914,8 @@ type __premarshalNeighborsNeighborsCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -8202,6 +8937,7 @@ func (v *NeighborsNeighborsCertifyGood) __premarshalJSON() (*__premarshalNeighbo
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -8867,6 +9603,24 @@ func (v *NeighborsNeighborsHasSBOM) GetOrigin() string { return v.AllHasSBOMTree
 // GetCollector returns NeighborsNeighborsHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *NeighborsNeighborsHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns NeighborsNeighborsHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
+// GetIncludedSoftware returns NeighborsNeighborsHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.AllHasSBOMTree.IncludedSoftware
+}
+
+// GetIncludedDependencies returns NeighborsNeighborsHasSBOM.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.AllHasSBOMTree.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns NeighborsNeighborsHasSBOM.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *NeighborsNeighborsHasSBOM) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.AllHasSBOMTree.IncludedOccurrences
+}
+
 func (v *NeighborsNeighborsHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -8910,6 +9664,14 @@ type __premarshalNeighborsNeighborsHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
 }
 
 func (v *NeighborsNeighborsHasSBOM) MarshalJSON() ([]byte, error) {
@@ -8943,6 +9705,27 @@ func (v *NeighborsNeighborsHasSBOM) __premarshalJSON() (*__premarshalNeighborsNe
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.AllHasSBOMTree.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal NeighborsNeighborsHasSBOM.AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.AllHasSBOMTree.IncludedDependencies
+	retval.IncludedOccurrences = v.AllHasSBOMTree.IncludedOccurrences
 	return &retval, nil
 }
 
@@ -11427,6 +12210,9 @@ func (v *NodeNodeCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns NodeNodeCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns NodeNodeCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns NodeNodeCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -11470,6 +12256,8 @@ type __premarshalNodeNodeCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -11491,6 +12279,7 @@ func (v *NodeNodeCertifyBad) __premarshalJSON() (*__premarshalNodeNodeCertifyBad
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -11536,6 +12325,9 @@ func (v *NodeNodeCertifyGood) GetId() string { return v.AllCertifyGood.Id }
 // GetJustification returns NodeNodeCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
 
+// GetKnownSince returns NodeNodeCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodeNodeCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns NodeNodeCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *NodeNodeCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -11579,6 +12371,8 @@ type __premarshalNodeNodeCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -11600,6 +12394,7 @@ func (v *NodeNodeCertifyGood) __premarshalJSON() (*__premarshalNodeNodeCertifyGo
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -12247,6 +13042,24 @@ func (v *NodeNodeHasSBOM) GetOrigin() string { return v.AllHasSBOMTree.Origin }
 // GetCollector returns NodeNodeHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *NodeNodeHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns NodeNodeHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
+// GetIncludedSoftware returns NodeNodeHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.AllHasSBOMTree.IncludedSoftware
+}
+
+// GetIncludedDependencies returns NodeNodeHasSBOM.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.AllHasSBOMTree.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns NodeNodeHasSBOM.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *NodeNodeHasSBOM) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.AllHasSBOMTree.IncludedOccurrences
+}
+
 func (v *NodeNodeHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -12290,6 +13103,14 @@ type __premarshalNodeNodeHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
 }
 
 func (v *NodeNodeHasSBOM) MarshalJSON() ([]byte, error) {
@@ -12323,6 +13144,27 @@ func (v *NodeNodeHasSBOM) __premarshalJSON() (*__premarshalNodeNodeHasSBOM, erro
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.AllHasSBOMTree.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal NodeNodeHasSBOM.AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.AllHasSBOMTree.IncludedDependencies
+	retval.IncludedOccurrences = v.AllHasSBOMTree.IncludedOccurrences
 	return &retval, nil
 }
 
@@ -13875,6 +14717,9 @@ func (v *NodesNodesCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns NodesNodesCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns NodesNodesCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodesNodesCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns NodesNodesCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -13918,6 +14763,8 @@ type __premarshalNodesNodesCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -13939,6 +14786,7 @@ func (v *NodesNodesCertifyBad) __premarshalJSON() (*__premarshalNodesNodesCertif
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -13984,6 +14832,9 @@ func (v *NodesNodesCertifyGood) GetId() string { return v.AllCertifyGood.Id }
 // GetJustification returns NodesNodesCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
 
+// GetKnownSince returns NodesNodesCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodesNodesCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns NodesNodesCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *NodesNodesCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -14027,6 +14878,8 @@ type __premarshalNodesNodesCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -14048,6 +14901,7 @@ func (v *NodesNodesCertifyGood) __premarshalJSON() (*__premarshalNodesNodesCerti
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -14697,6 +15551,24 @@ func (v *NodesNodesHasSBOM) GetOrigin() string { return v.AllHasSBOMTree.Origin 
 // GetCollector returns NodesNodesHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *NodesNodesHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns NodesNodesHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
+// GetIncludedSoftware returns NodesNodesHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.AllHasSBOMTree.IncludedSoftware
+}
+
+// GetIncludedDependencies returns NodesNodesHasSBOM.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasSBOM) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.AllHasSBOMTree.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns NodesNodesHasSBOM.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *NodesNodesHasSBOM) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.AllHasSBOMTree.IncludedOccurrences
+}
+
 func (v *NodesNodesHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -14740,6 +15612,14 @@ type __premarshalNodesNodesHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
 }
 
 func (v *NodesNodesHasSBOM) MarshalJSON() ([]byte, error) {
@@ -14773,6 +15653,27 @@ func (v *NodesNodesHasSBOM) __premarshalJSON() (*__premarshalNodesNodesHasSBOM, 
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.AllHasSBOMTree.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal NodesNodesHasSBOM.AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.AllHasSBOMTree.IncludedDependencies
+	retval.IncludedOccurrences = v.AllHasSBOMTree.IncludedOccurrences
 	return &retval, nil
 }
 
@@ -17329,6 +18230,9 @@ func (v *PathPathCertifyBad) GetId() string { return v.AllCertifyBad.Id }
 // GetJustification returns PathPathCertifyBad.Justification, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyBad) GetJustification() string { return v.AllCertifyBad.Justification }
 
+// GetKnownSince returns PathPathCertifyBad.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyBad) GetKnownSince() time.Time { return v.AllCertifyBad.KnownSince }
+
 // GetSubject returns PathPathCertifyBad.Subject, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyBad) GetSubject() AllCertifyBadSubjectPackageSourceOrArtifact {
 	return v.AllCertifyBad.Subject
@@ -17372,6 +18276,8 @@ type __premarshalPathPathCertifyBad struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -17393,6 +18299,7 @@ func (v *PathPathCertifyBad) __premarshalJSON() (*__premarshalPathPathCertifyBad
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyBad.Id
 	retval.Justification = v.AllCertifyBad.Justification
+	retval.KnownSince = v.AllCertifyBad.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -17438,6 +18345,9 @@ func (v *PathPathCertifyGood) GetId() string { return v.AllCertifyGood.Id }
 // GetJustification returns PathPathCertifyGood.Justification, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyGood) GetJustification() string { return v.AllCertifyGood.Justification }
 
+// GetKnownSince returns PathPathCertifyGood.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathCertifyGood) GetKnownSince() time.Time { return v.AllCertifyGood.KnownSince }
+
 // GetSubject returns PathPathCertifyGood.Subject, and is useful for accessing the field via an interface.
 func (v *PathPathCertifyGood) GetSubject() AllCertifyGoodSubjectPackageSourceOrArtifact {
 	return v.AllCertifyGood.Subject
@@ -17481,6 +18391,8 @@ type __premarshalPathPathCertifyGood struct {
 
 	Justification string `json:"justification"`
 
+	KnownSince time.Time `json:"knownSince"`
+
 	Subject json.RawMessage `json:"subject"`
 
 	Origin string `json:"origin"`
@@ -17502,6 +18414,7 @@ func (v *PathPathCertifyGood) __premarshalJSON() (*__premarshalPathPathCertifyGo
 	retval.Typename = v.Typename
 	retval.Id = v.AllCertifyGood.Id
 	retval.Justification = v.AllCertifyGood.Justification
+	retval.KnownSince = v.AllCertifyGood.KnownSince
 	{
 
 		dst := &retval.Subject
@@ -18149,6 +19062,24 @@ func (v *PathPathHasSBOM) GetOrigin() string { return v.AllHasSBOMTree.Origin }
 // GetCollector returns PathPathHasSBOM.Collector, and is useful for accessing the field via an interface.
 func (v *PathPathHasSBOM) GetCollector() string { return v.AllHasSBOMTree.Collector }
 
+// GetKnownSince returns PathPathHasSBOM.KnownSince, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetKnownSince() time.Time { return v.AllHasSBOMTree.KnownSince }
+
+// GetIncludedSoftware returns PathPathHasSBOM.IncludedSoftware, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetIncludedSoftware() []AllHasSBOMTreeIncludedSoftwarePackageOrArtifact {
+	return v.AllHasSBOMTree.IncludedSoftware
+}
+
+// GetIncludedDependencies returns PathPathHasSBOM.IncludedDependencies, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetIncludedDependencies() []AllHasSBOMTreeIncludedDependenciesIsDependency {
+	return v.AllHasSBOMTree.IncludedDependencies
+}
+
+// GetIncludedOccurrences returns PathPathHasSBOM.IncludedOccurrences, and is useful for accessing the field via an interface.
+func (v *PathPathHasSBOM) GetIncludedOccurrences() []AllHasSBOMTreeIncludedOccurrencesIsOccurrence {
+	return v.AllHasSBOMTree.IncludedOccurrences
+}
+
 func (v *PathPathHasSBOM) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -18192,6 +19123,14 @@ type __premarshalPathPathHasSBOM struct {
 	Origin string `json:"origin"`
 
 	Collector string `json:"collector"`
+
+	KnownSince time.Time `json:"knownSince"`
+
+	IncludedSoftware []json.RawMessage `json:"includedSoftware"`
+
+	IncludedDependencies []AllHasSBOMTreeIncludedDependenciesIsDependency `json:"includedDependencies"`
+
+	IncludedOccurrences []AllHasSBOMTreeIncludedOccurrencesIsOccurrence `json:"includedOccurrences"`
 }
 
 func (v *PathPathHasSBOM) MarshalJSON() ([]byte, error) {
@@ -18225,6 +19164,27 @@ func (v *PathPathHasSBOM) __premarshalJSON() (*__premarshalPathPathHasSBOM, erro
 	retval.DownloadLocation = v.AllHasSBOMTree.DownloadLocation
 	retval.Origin = v.AllHasSBOMTree.Origin
 	retval.Collector = v.AllHasSBOMTree.Collector
+	retval.KnownSince = v.AllHasSBOMTree.KnownSince
+	{
+
+		dst := &retval.IncludedSoftware
+		src := v.AllHasSBOMTree.IncludedSoftware
+		*dst = make(
+			[]json.RawMessage,
+			len(src))
+		for i, src := range src {
+			dst := &(*dst)[i]
+			var err error
+			*dst, err = __marshalAllHasSBOMTreeIncludedSoftwarePackageOrArtifact(
+				&src)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to marshal PathPathHasSBOM.AllHasSBOMTree.IncludedSoftware: %w", err)
+			}
+		}
+	}
+	retval.IncludedDependencies = v.AllHasSBOMTree.IncludedDependencies
+	retval.IncludedOccurrences = v.AllHasSBOMTree.IncludedOccurrences
 	return &retval, nil
 }
 
@@ -21332,8 +22292,9 @@ func (v *__HasMetadataSrcsInput) GetHasMetadataList() []HasMetadataInputSpec {
 
 // __HasSBOMArtifactInput is used internally by genqlient
 type __HasSBOMArtifactInput struct {
-	Artifact ArtifactInputSpec `json:"artifact"`
-	HasSBOM  HasSBOMInputSpec  `json:"hasSBOM"`
+	Artifact ArtifactInputSpec        `json:"artifact"`
+	HasSBOM  HasSBOMInputSpec         `json:"hasSBOM"`
+	Includes HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetArtifact returns __HasSBOMArtifactInput.Artifact, and is useful for accessing the field via an interface.
@@ -21342,10 +22303,14 @@ func (v *__HasSBOMArtifactInput) GetArtifact() ArtifactInputSpec { return v.Arti
 // GetHasSBOM returns __HasSBOMArtifactInput.HasSBOM, and is useful for accessing the field via an interface.
 func (v *__HasSBOMArtifactInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
 
+// GetIncludes returns __HasSBOMArtifactInput.Includes, and is useful for accessing the field via an interface.
+func (v *__HasSBOMArtifactInput) GetIncludes() HasSBOMIncludesInputSpec { return v.Includes }
+
 // __HasSBOMArtifactsInput is used internally by genqlient
 type __HasSBOMArtifactsInput struct {
-	Artifacts []ArtifactInputSpec `json:"artifacts"`
-	HasSBOMs  []HasSBOMInputSpec  `json:"hasSBOMs"`
+	Artifacts []ArtifactInputSpec        `json:"artifacts"`
+	HasSBOMs  []HasSBOMInputSpec         `json:"hasSBOMs"`
+	Includes  []HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetArtifacts returns __HasSBOMArtifactsInput.Artifacts, and is useful for accessing the field via an interface.
@@ -21354,10 +22319,14 @@ func (v *__HasSBOMArtifactsInput) GetArtifacts() []ArtifactInputSpec { return v.
 // GetHasSBOMs returns __HasSBOMArtifactsInput.HasSBOMs, and is useful for accessing the field via an interface.
 func (v *__HasSBOMArtifactsInput) GetHasSBOMs() []HasSBOMInputSpec { return v.HasSBOMs }
 
+// GetIncludes returns __HasSBOMArtifactsInput.Includes, and is useful for accessing the field via an interface.
+func (v *__HasSBOMArtifactsInput) GetIncludes() []HasSBOMIncludesInputSpec { return v.Includes }
+
 // __HasSBOMPkgInput is used internally by genqlient
 type __HasSBOMPkgInput struct {
-	Pkg     PkgInputSpec     `json:"pkg"`
-	HasSBOM HasSBOMInputSpec `json:"hasSBOM"`
+	Pkg      PkgInputSpec             `json:"pkg"`
+	HasSBOM  HasSBOMInputSpec         `json:"hasSBOM"`
+	Includes HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetPkg returns __HasSBOMPkgInput.Pkg, and is useful for accessing the field via an interface.
@@ -21366,10 +22335,14 @@ func (v *__HasSBOMPkgInput) GetPkg() PkgInputSpec { return v.Pkg }
 // GetHasSBOM returns __HasSBOMPkgInput.HasSBOM, and is useful for accessing the field via an interface.
 func (v *__HasSBOMPkgInput) GetHasSBOM() HasSBOMInputSpec { return v.HasSBOM }
 
+// GetIncludes returns __HasSBOMPkgInput.Includes, and is useful for accessing the field via an interface.
+func (v *__HasSBOMPkgInput) GetIncludes() HasSBOMIncludesInputSpec { return v.Includes }
+
 // __HasSBOMPkgsInput is used internally by genqlient
 type __HasSBOMPkgsInput struct {
-	Pkgs     []PkgInputSpec     `json:"pkgs"`
-	HasSBOMs []HasSBOMInputSpec `json:"hasSBOMs"`
+	Pkgs     []PkgInputSpec             `json:"pkgs"`
+	HasSBOMs []HasSBOMInputSpec         `json:"hasSBOMs"`
+	Includes []HasSBOMIncludesInputSpec `json:"includes"`
 }
 
 // GetPkgs returns __HasSBOMPkgsInput.Pkgs, and is useful for accessing the field via an interface.
@@ -21377,6 +22350,9 @@ func (v *__HasSBOMPkgsInput) GetPkgs() []PkgInputSpec { return v.Pkgs }
 
 // GetHasSBOMs returns __HasSBOMPkgsInput.HasSBOMs, and is useful for accessing the field via an interface.
 func (v *__HasSBOMPkgsInput) GetHasSBOMs() []HasSBOMInputSpec { return v.HasSBOMs }
+
+// GetIncludes returns __HasSBOMPkgsInput.Includes, and is useful for accessing the field via an interface.
+func (v *__HasSBOMPkgsInput) GetIncludes() []HasSBOMIncludesInputSpec { return v.Includes }
 
 // __IngestArtifactInput is used internally by genqlient
 type __IngestArtifactInput struct {
@@ -22277,6 +23253,7 @@ query CertifyBads ($filter: CertifyBadSpec!) {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -23423,8 +24400,8 @@ func HasMetadataSrcs(
 
 // The query or mutation executed by HasSBOMArtifact.
 const HasSBOMArtifact_Operation = `
-mutation HasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-	ingestHasSBOM(subject: {artifact:$artifact}, hasSBOM: $hasSBOM)
+mutation HasSBOMArtifact ($artifact: ArtifactInputSpec!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
+	ingestHasSBOM(subject: {artifact:$artifact}, hasSBOM: $hasSBOM, includes: $includes)
 }
 `
 
@@ -23433,6 +24410,7 @@ func HasSBOMArtifact(
 	client graphql.Client,
 	artifact ArtifactInputSpec,
 	hasSBOM HasSBOMInputSpec,
+	includes HasSBOMIncludesInputSpec,
 ) (*HasSBOMArtifactResponse, error) {
 	req := &graphql.Request{
 		OpName: "HasSBOMArtifact",
@@ -23440,6 +24418,7 @@ func HasSBOMArtifact(
 		Variables: &__HasSBOMArtifactInput{
 			Artifact: artifact,
 			HasSBOM:  hasSBOM,
+			Includes: includes,
 		},
 	}
 	var err error
@@ -23458,8 +24437,8 @@ func HasSBOMArtifact(
 
 // The query or mutation executed by HasSBOMArtifacts.
 const HasSBOMArtifacts_Operation = `
-mutation HasSBOMArtifacts ($artifacts: [ArtifactInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!) {
-	ingestHasSBOMs(subjects: {artifacts:$artifacts}, hasSBOMs: $hasSBOMs)
+mutation HasSBOMArtifacts ($artifacts: [ArtifactInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
+	ingestHasSBOMs(subjects: {artifacts:$artifacts}, hasSBOMs: $hasSBOMs, includes: $includes)
 }
 `
 
@@ -23468,6 +24447,7 @@ func HasSBOMArtifacts(
 	client graphql.Client,
 	artifacts []ArtifactInputSpec,
 	hasSBOMs []HasSBOMInputSpec,
+	includes []HasSBOMIncludesInputSpec,
 ) (*HasSBOMArtifactsResponse, error) {
 	req := &graphql.Request{
 		OpName: "HasSBOMArtifacts",
@@ -23475,6 +24455,7 @@ func HasSBOMArtifacts(
 		Variables: &__HasSBOMArtifactsInput{
 			Artifacts: artifacts,
 			HasSBOMs:  hasSBOMs,
+			Includes:  includes,
 		},
 	}
 	var err error
@@ -23493,8 +24474,8 @@ func HasSBOMArtifacts(
 
 // The query or mutation executed by HasSBOMPkg.
 const HasSBOMPkg_Operation = `
-mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!) {
-	ingestHasSBOM(subject: {package:$pkg}, hasSBOM: $hasSBOM)
+mutation HasSBOMPkg ($pkg: PkgInputSpec!, $hasSBOM: HasSBOMInputSpec!, $includes: HasSBOMIncludesInputSpec!) {
+	ingestHasSBOM(subject: {package:$pkg}, hasSBOM: $hasSBOM, includes: $includes)
 }
 `
 
@@ -23503,13 +24484,15 @@ func HasSBOMPkg(
 	client graphql.Client,
 	pkg PkgInputSpec,
 	hasSBOM HasSBOMInputSpec,
+	includes HasSBOMIncludesInputSpec,
 ) (*HasSBOMPkgResponse, error) {
 	req := &graphql.Request{
 		OpName: "HasSBOMPkg",
 		Query:  HasSBOMPkg_Operation,
 		Variables: &__HasSBOMPkgInput{
-			Pkg:     pkg,
-			HasSBOM: hasSBOM,
+			Pkg:      pkg,
+			HasSBOM:  hasSBOM,
+			Includes: includes,
 		},
 	}
 	var err error
@@ -23528,8 +24511,8 @@ func HasSBOMPkg(
 
 // The query or mutation executed by HasSBOMPkgs.
 const HasSBOMPkgs_Operation = `
-mutation HasSBOMPkgs ($pkgs: [PkgInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!) {
-	ingestHasSBOMs(subjects: {packages:$pkgs}, hasSBOMs: $hasSBOMs)
+mutation HasSBOMPkgs ($pkgs: [PkgInputSpec!]!, $hasSBOMs: [HasSBOMInputSpec!]!, $includes: [HasSBOMIncludesInputSpec!]!) {
+	ingestHasSBOMs(subjects: {packages:$pkgs}, hasSBOMs: $hasSBOMs, includes: $includes)
 }
 `
 
@@ -23538,6 +24521,7 @@ func HasSBOMPkgs(
 	client graphql.Client,
 	pkgs []PkgInputSpec,
 	hasSBOMs []HasSBOMInputSpec,
+	includes []HasSBOMIncludesInputSpec,
 ) (*HasSBOMPkgsResponse, error) {
 	req := &graphql.Request{
 		OpName: "HasSBOMPkgs",
@@ -23545,6 +24529,7 @@ func HasSBOMPkgs(
 		Variables: &__HasSBOMPkgsInput{
 			Pkgs:     pkgs,
 			HasSBOMs: hasSBOMs,
+			Includes: includes,
 		},
 	}
 	var err error
@@ -23914,7 +24899,12 @@ func IngestLicenses(
 // The query or mutation executed by IngestPackage.
 const IngestPackage_Operation = `
 mutation IngestPackage ($pkg: PkgInputSpec!) {
-	ingestPackage(pkg: $pkg)
+	ingestPackage(pkg: $pkg) {
+		packageTypeID
+		packageNamespaceID
+		packageNameID
+		packageVersionID
+	}
 }
 `
 
@@ -23947,7 +24937,12 @@ func IngestPackage(
 // The query or mutation executed by IngestPackages.
 const IngestPackages_Operation = `
 mutation IngestPackages ($pkgs: [PkgInputSpec!]!) {
-	ingestPackages(pkgs: $pkgs)
+	ingestPackages(pkgs: $pkgs) {
+		packageTypeID
+		packageNamespaceID
+		packageNameID
+		packageVersionID
+	}
 }
 `
 
@@ -24054,7 +25049,11 @@ func IngestPkgEquals(
 // The query or mutation executed by IngestSource.
 const IngestSource_Operation = `
 mutation IngestSource ($source: SourceInputSpec!) {
-	ingestSource(source: $source)
+	ingestSource(source: $source) {
+		sourceTypeID
+		sourceNamespaceID
+		sourceNameID
+	}
 }
 `
 
@@ -24087,7 +25086,11 @@ func IngestSource(
 // The query or mutation executed by IngestSources.
 const IngestSources_Operation = `
 mutation IngestSources ($sources: [SourceInputSpec!]!) {
-	ingestSources(sources: $sources)
+	ingestSources(sources: $sources) {
+		sourceTypeID
+		sourceNamespaceID
+		sourceNameID
+	}
 }
 `
 
@@ -24748,6 +25751,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -24766,6 +25770,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -24807,6 +25812,22 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
+	includedSoftware {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	includedDependencies {
+		... AllIsDependencyTree
+	}
+	includedOccurrences {
+		... AllIsOccurrencesTree
+	}
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id
@@ -25207,6 +26228,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25225,6 +26247,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25266,6 +26289,22 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
+	includedSoftware {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	includedDependencies {
+		... AllIsDependencyTree
+	}
+	includedOccurrences {
+		... AllIsOccurrencesTree
+	}
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id
@@ -25664,6 +26703,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25682,6 +26722,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -25723,6 +26764,22 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
+	includedSoftware {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	includedDependencies {
+		... AllIsDependencyTree
+	}
+	includedOccurrences {
+		... AllIsOccurrencesTree
+	}
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id
@@ -26350,6 +27407,7 @@ fragment AllSLSATree on HasSLSA {
 fragment AllCertifyBad on CertifyBad {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -26368,6 +27426,7 @@ fragment AllCertifyBad on CertifyBad {
 fragment AllCertifyGood on CertifyGood {
 	id
 	justification
+	knownSince
 	subject {
 		__typename
 		... on Package {
@@ -26409,6 +27468,22 @@ fragment AllHasSBOMTree on HasSBOM {
 	downloadLocation
 	origin
 	collector
+	knownSince
+	includedSoftware {
+		__typename
+		... on Artifact {
+			... AllArtifactTree
+		}
+		... on Package {
+			... AllPkgTree
+		}
+	}
+	includedDependencies {
+		... AllIsDependencyTree
+	}
+	includedOccurrences {
+		... AllIsOccurrencesTree
+	}
 }
 fragment AllHasSourceAt on HasSourceAt {
 	id
